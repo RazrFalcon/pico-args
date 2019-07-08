@@ -1,0 +1,11 @@
+[package]
+name = "pico-args"
+version = "0.1.0"
+authors = ["Evgeniy Reizner <razrfalcon@gmail.com>"]
+edition = "2018"
+keywords = ["args", "cli"]
+license = "MIT"
+description = "An ultra simple CLI arguments parser."
+repository = "https://github.com/RazrFalcon/pico-args"
+documentation = "https://docs.rs/pico-args/"
+readme = "README.md"

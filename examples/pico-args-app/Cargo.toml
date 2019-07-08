@@ -1,0 +1,12 @@
+[package]
+name = "pico-args-app"
+version = "0.1.0"
+authors = ["Evgeniy Reizner <razrfalcon@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "app"
+path = "../app.rs"
+
+[dependencies]
+pico-args = { path = "../.." }
