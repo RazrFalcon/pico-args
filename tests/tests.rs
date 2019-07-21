@@ -67,6 +67,97 @@ fn invalid_flag_4() {
     assert!(args.contains(["-v", "version"]));
 }
 
+
+#[test]
+fn option_01() {
+    let mut args = Arguments::from_args(to_vec(&["-w", "10"]));
+    let value: Option<u32> = args.value_from_str("-w").unwrap();
+    assert_eq!(value.unwrap(), 10);
+}
+
+#[test]
+fn option_02() {
+    let mut args = Arguments::from_args(to_vec(&["--width", "10"]));
+    let value: Option<u32> = args.value_from_str("--width").unwrap();
+    assert_eq!(value.unwrap(), 10);
+}
+
+#[test]
+fn option_03() {
+    let mut args = Arguments::from_args(to_vec(&["--name", "test"]));
+    let value: Option<String> = args.value_from_str("--name").unwrap();
+    assert_eq!(value.unwrap(), "test");
+}
+
+#[test]
+fn eq_option_01() {
+    let mut args = Arguments::from_args(to_vec(&["-w=10"]));
+    let value: Option<u32> = args.value_from_str("-w").unwrap();
+    assert_eq!(value.unwrap(), 10);
+}
+
+#[test]
+fn eq_option_02() {
+    let mut args = Arguments::from_args(to_vec(&["-w='10'"]));
+    let value: Option<u32> = args.value_from_str("-w").unwrap();
+    assert_eq!(value.unwrap(), 10);
+}
+
+#[test]
+fn eq_option_03() {
+    let mut args = Arguments::from_args(to_vec(&["-w=\"10\""]));
+    let value: Option<u32> = args.value_from_str("-w").unwrap();
+    assert_eq!(value.unwrap(), 10);
+}
+
+#[test]
+fn eq_option_err_01() {
+    let mut args = Arguments::from_args(to_vec(&["-w="]));
+    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("-w");
+    assert_eq!(value.unwrap_err().to_string(),
+               "the '-w' option doesn't have an associated value");
+}
+
+#[test]
+fn eq_option_err_02() {
+    let mut args = Arguments::from_args(to_vec(&["-w='"]));
+    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("-w");
+    assert_eq!(value.unwrap_err().to_string(),
+               "the '-w' option doesn't have an associated value");
+}
+
+#[test]
+fn eq_option_err_03() {
+    let mut args = Arguments::from_args(to_vec(&["-w=''"]));
+    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("-w");
+    assert_eq!(value.unwrap_err().to_string(),
+               "the '-w' option doesn't have an associated value");
+}
+
+#[test]
+fn eq_option_err_04() {
+    let mut args = Arguments::from_args(to_vec(&["-w='\""]));
+    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("-w");
+    assert_eq!(value.unwrap_err().to_string(),
+               "the '-w' option doesn't have an associated value");
+}
+
+#[test]
+fn eq_option_err_05() {
+    let mut args = Arguments::from_args(to_vec(&["-w='10\""]));
+    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("-w");
+    assert_eq!(value.unwrap_err().to_string(),
+               "the '-w' option doesn't have an associated value");
+}
+
+#[test]
+fn eq_option_err_06() {
+    let mut args = Arguments::from_args(to_vec(&["-w-10"]));
+    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("-w");
+    assert_eq!(value.unwrap_err().to_string(),
+               "the '-w' option doesn't have an associated value");
+}
+
 #[test]
 fn missing_option_value_1() {
     let mut args = Arguments::from_args(to_vec(&["--value"]));

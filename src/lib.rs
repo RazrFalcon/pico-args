@@ -2,7 +2,7 @@
 An ultra simple CLI arguments parser.
 
 - Only flags, options and free arguments are supported.
-- Arguments must be separated by a space. `=` isn't supported.
+- Arguments can be separated by a space or `=`.
 - No help generation.
 - No combined flags (like `-vvv` or `-abc`).
 
@@ -20,11 +20,12 @@ There are a lot of arguments parsing implementations, but we will use only two:
 
 | Feature | `pico-args` | `clap` | `gumdrop` |
 ---|---|---|---
-| Binary size | 5.7KiB | 340KiB | 12.9KiB |
-| Build time | 0.8s | 15s | 31s |
+| Binary overhead | 18.9KiB | 435.1KiB | 23KiB |
+| Build time | 0.9s | 15s | 31s |
 | Tested version | 0.1.0 | 2.33.0 | 0.6.0 |
 
-- Binary size overhead was measured using `cargo bloat --release --crates` (app + args crate).
+- Binary size overhead was measured by subtracting the `.text` section size of an app with
+  arguments parsing and a hello world app.
 - Build time was measured using `hyperfine 'cargo clean; cargo build --release'`.
 - Test projects can be found in `examples/`.
 */
@@ -121,8 +122,6 @@ impl Arguments {
 
     /// Parses a key-value pair.
     ///
-    /// Key and value must be separated by a space and not `=`.
-    ///
     /// Uses the `FromStr` trait for value conversion.
     ///
     /// Must be used only once for each option.
@@ -136,8 +135,6 @@ impl Arguments {
     }
 
     /// Parses a key-value pair.
-    ///
-    /// Key and value must be separated by a space and not `=`.
     ///
     /// Uses a specified function for value conversion.
     ///
@@ -157,6 +154,8 @@ impl Arguments {
         f: fn(&str) -> Result<T, String>,
     ) -> Result<Option<T>, Error> {
         if let Some((idx, key)) = self.index_of(keys) {
+            // Parse a `--key value` pair.
+
             let value = match self.0.get(idx + 1) {
                 Some(v) => v,
                 None => return Err(Error::OptionWithoutAValue(key)),
@@ -173,6 +172,47 @@ impl Arguments {
                     Err(Error::OptionValueParsingFailed(key, e))
                 }
             }
+        } else if let Some((idx, key)) = self.index_of2(keys) {
+            // Parse a `--key=value` pair.
+
+            let mut value = self.0.remove(idx);
+
+            let mut prefix_len = key.len(); // the key itself
+            if value.as_bytes().get(prefix_len) == Some(&b'=') {
+                prefix_len += 1;
+            } else {
+                // Key must be followed by `=`.
+                return Err(Error::OptionWithoutAValue(key));
+            }
+
+            // Check for quoted value.
+            if let Some(c) = value.as_bytes().get(prefix_len).cloned() {
+                if c == b'"' || c == b'\'' {
+                    prefix_len += 1;
+
+                    // A closing quote must be the same as an opening one.
+                    if value.pop() != Some(c as char) {
+                        return Err(Error::OptionWithoutAValue(key));
+                    }
+                }
+            }
+
+            // Check length, otherwise String::drain will panic.
+            if prefix_len >= value.len() {
+                return Err(Error::OptionWithoutAValue(key));
+            }
+
+            // Remove `--key=` prefix.
+            value.drain(0..prefix_len);
+
+            if value.is_empty() {
+                return Err(Error::OptionWithoutAValue(key));
+            }
+
+            match f(&value) {
+                Ok(value) => Ok(Some(value)),
+                Err(e) => Err(Error::OptionValueParsingFailed(key, e)),
+            }
         } else {
             Ok(None)
         }
@@ -183,6 +223,20 @@ impl Arguments {
         for key in &keys.0 {
             if !key.is_empty() {
                 if let Some(i) = self.0.iter().position(|v| v == key) {
+                    return Some((i, key));
+                }
+            }
+        }
+
+        None
+    }
+
+    #[inline(never)]
+    fn index_of2<'a>(&self, keys: Keys) -> Option<(usize, &'a str)> {
+        for key in &keys.0 {
+            if !key.is_empty() {
+                // crate::starts_with is 0.5KiB smaller than str::starts_with.
+                if let Some(i) = self.0.iter().position(|v| starts_with(v, key)) {
                     return Some((i, key));
                 }
             }
@@ -230,6 +284,11 @@ where
     s.parse().map_err(|e: <T as FromStr>::Err| e.to_string())
 }
 
+#[inline(never)]
+fn starts_with(text: &str, prefix: &str) -> bool {
+    text.get(0..prefix.len()) == Some(prefix)
+}
+
 
 /// A keys container.
 ///
@@ -238,6 +297,7 @@ where
 pub struct Keys([&'static str; 2]);
 
 impl From<[&'static str; 2]> for Keys {
+    #[inline]
     fn from(v: [&'static str; 2]) -> Self {
         debug_assert!(v[0].starts_with("-"), "an argument should start with '-'");
         debug_assert!(!v[0].starts_with("--"), "the first argument should be short");
@@ -248,6 +308,7 @@ impl From<[&'static str; 2]> for Keys {
 }
 
 impl From<&'static str> for Keys {
+    #[inline]
     fn from(v: &'static str) -> Self {
         debug_assert!(v.starts_with("-"), "an argument should start with '-'");
 
