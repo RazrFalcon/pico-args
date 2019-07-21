@@ -6,7 +6,7 @@
 An ultra simple CLI arguments parser.
 
 - Only flags, options and free arguments are supported.
-- Arguments must be separated by a space. `=` isn't supported.
+- Arguments can be separated by a space or `=`.
 - No help generation.
 - No combined flags (like `-vvv` or `-abc`).
 
@@ -24,11 +24,12 @@ There are a lot of arguments parsing implementations, but we will use only two:
 
 | Feature | `pico-args` | `clap` | `gumdrop` |
 ---|---|---|---
-| Binary size | 5.7KiB | 340KiB | 12.9KiB |
-| Build time | 0.8s | 15s | 31s |
+| Binary overhead | 18.9KiB | 435.1KiB | 23KiB |
+| Build time | 0.9s | 15s | 31s |
 | Tested version | 0.1.0 | 2.33.0 | 0.6.0 |
 
-- Binary size overhead was measured using `cargo bloat --release --crates` (app + args crate).
+- Binary size overhead was measured by subtracting the `.text` section size of an app with
+  arguments parsing and a hello world app.
 - Build time was measured using `hyperfine 'cargo clean; cargo build --release'`.
 - Test projects can be found in `examples/`.
 
