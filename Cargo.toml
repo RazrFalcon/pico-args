@@ -9,3 +9,4 @@ description = "An ultra simple CLI arguments parser."
 repository = "https://github.com/RazrFalcon/pico-args"
 documentation = "https://docs.rs/pico-args/"
 readme = "README.md"
+exclude = ["test-apps/**"]
