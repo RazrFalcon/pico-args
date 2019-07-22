@@ -10,12 +10,7 @@ struct AppArgs {
 }
 
 fn parse_width(s: &str) -> Result<u32, String> {
-    let w = s.parse().map_err(|_| "not a number")?;
-    if w != 0 {
-        Ok(w)
-    } else {
-        Err("width must be positive".to_string())
-    }
+    s.parse().map_err(|_| "not a number".to_string())
 }
 
 fn main() {

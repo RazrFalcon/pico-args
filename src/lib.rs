@@ -6,6 +6,46 @@ An ultra simple CLI arguments parser.
 - No help generation.
 - No combined flags (like `-vvv` or `-abc`).
 
+## Example
+
+```rust
+use pico_args::Arguments;
+
+struct Args {
+    help: bool,
+    version: bool,
+    number: u32,
+    opt_number: Option<u32>,
+    width: u32,
+    free: Vec<String>,
+}
+
+fn parse_width(s: &str) -> Result<u32, String> {
+    s.parse().map_err(|_| "not a number".to_string())
+}
+
+fn main() -> Result<(), Box<std::error::Error>> {
+    let mut args = Arguments::from_env();
+    // Arguments can be parsed in any order.
+    let args = Args {
+        // You can use a slice for multiple commands
+        help: args.contains(["-h", "--help"]),
+        // or just a string for a single one.
+        version: args.contains("-V"),
+        // Parses a value that implements `FromStr`.
+        number: args.value_from_str("--number")?.unwrap_or(5),
+        // Parses an optional value that implements `FromStr`.
+        opt_number: args.value_from_str("--opt-number")?,
+        // Parses a value using a specified function.
+        width: args.value_from_fn("--width", parse_width)?.unwrap_or(10),
+        // Will return all free arguments or an error if any flags are left.
+        free: args.free()?,
+    };
+
+    Ok(())
+}
+```
+
 ## Alternatives
 
 The core idea of `pico-args` is to provide some "sugar" for arguments parsing without
@@ -19,7 +59,7 @@ There are a lot of arguments parsing implementations, but we will use only these
 - [gumdrop](https://crates.io/crates/gumdrop) - a simple parser that uses procedural macros
 - [structopt](https://crates.io/crates/structopt) - a two above combined
 
-| Feature | `pico-args` | `clap` | `gumdrop` | `structopt` |
+| | `pico-args` | `clap` | `gumdrop` | `structopt` |
 ---|---|---|---|---
 | Binary overhead | 18.9KiB | 435.1KiB | 23KiB | 436.8KiB |
 | Build time | 0.9s | 15s | 31s | 27s |
