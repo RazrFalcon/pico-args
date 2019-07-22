@@ -61,7 +61,7 @@ There are a lot of arguments parsing implementations, but we will use only these
 
 | | `pico-args` | `clap` | `gumdrop` | `structopt` |
 ---|---|---|---|---
-| Binary overhead | 18.9KiB | 435.1KiB | 23KiB | 436.8KiB |
+| Binary overhead | 20.3KiB | 435.1KiB | 23.0KiB | 436.8KiB |
 | Build time | 0.9s | 15s | 31s | 27s |
 | Tested version | 0.1.0 | 2.33.0 | 0.6.0 | 0.2.18 |
 
@@ -172,7 +172,7 @@ impl Arguments {
         T: FromStr,
         <T as FromStr>::Err: Display,
     {
-        self.value_from_fn_impl(keys.into(), from_str_wrapper)
+        self.value_from_fn_impl(keys.into(), FromStr::from_str)
     }
 
     /// Parses a key-value pair.
@@ -180,19 +180,19 @@ impl Arguments {
     /// Uses a specified function for value conversion.
     ///
     /// Must be used only once for each option.
-    pub fn value_from_fn<A: Into<Keys>, T>(
+    pub fn value_from_fn<A: Into<Keys>, T, E: Display>(
         &mut self,
         keys: A,
-        f: fn(&str) -> Result<T, String>,
+        f: fn(&str) -> Result<T, E>,
     ) -> Result<Option<T>, Error> {
         self.value_from_fn_impl(keys.into(), f)
     }
 
     #[inline(never)]
-    fn value_from_fn_impl<T>(
+    fn value_from_fn_impl<T, E: Display>(
         &mut self,
         keys: Keys,
-        f: fn(&str) -> Result<T, String>,
+        f: fn(&str) -> Result<T, E>,
     ) -> Result<Option<T>, Error> {
         if let Some((idx, key)) = self.index_of(keys) {
             // Parse a `--key value` pair.
@@ -210,7 +210,7 @@ impl Arguments {
                     Ok(Some(value))
                 }
                 Err(e) => {
-                    Err(Error::OptionValueParsingFailed(key, e))
+                    Err(Error::OptionValueParsingFailed(key, error_to_string(e)))
                 }
             }
         } else if let Some((idx, key)) = self.index_of2(keys) {
@@ -252,7 +252,7 @@ impl Arguments {
 
             match f(&value) {
                 Ok(value) => Ok(Some(value)),
-                Err(e) => Err(Error::OptionValueParsingFailed(key, e)),
+                Err(e) => Err(Error::OptionValueParsingFailed(key, error_to_string(e))),
             }
         } else {
             Ok(None)
@@ -316,13 +316,11 @@ impl Arguments {
     }
 }
 
-#[inline]
-fn from_str_wrapper<T>(s: &str) -> Result<T, String>
-where
-    T: FromStr,
-    <T as FromStr>::Err: Display,
-{
-    s.parse().map_err(|e: <T as FromStr>::Err| e.to_string())
+// to_string() is usually inlined, so by wrapping it in a non-inlined
+// function we are reducing the size a bit.
+#[inline(never)]
+fn error_to_string<E: Display>(e: E) -> String {
+    e.to_string()
 }
 
 #[inline(never)]
