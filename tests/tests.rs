@@ -1,9 +1,10 @@
 use std::str::FromStr;
+use std::ffi::OsString;
 
 use pico_args::*;
 
-fn to_vec(args: &[&str]) -> Vec<String> {
-    args.iter().map(|s| s.to_string()).collect()
+fn to_vec(args: &[&str]) -> Vec<OsString> {
+    args.iter().map(|s| s.to_string().into()).collect()
 }
 
 #[test]
@@ -161,12 +162,33 @@ fn eq_option_err_06() {
 }
 
 #[test]
+fn eq_option_err_07() {
+    let mut args = Arguments::from_vec(to_vec(&["-w=a"]));
+    let value: Result<Option<u32>, Error> = args.value_from_str("-w");
+    assert_eq!(value.unwrap_err().to_string(),
+               "failed to parse 'a' cause invalid digit found in string");
+}
+
+#[test]
 fn duplicated_options_01() {
     let mut args = Arguments::from_vec(to_vec(&["--name", "test1", "--name", "test2"]));
     let value1: Option<String> = args.value_from_str("--name").unwrap();
     let value2: Option<String> = args.value_from_str("--name").unwrap();
     assert_eq!(value1.unwrap(), "test1");
     assert_eq!(value2.unwrap(), "test2");
+}
+
+#[test]
+fn option_from_os_str_01() {
+    use std::path::PathBuf;
+
+    fn parse_path(s: &std::ffi::OsStr) -> Result<PathBuf, &'static str> {
+        Ok(s.into())
+    }
+
+    let mut args = Arguments::from_vec(to_vec(&["--input", "text.txt"]));
+    let value: Result<Option<PathBuf>, Error> = args.value_from_os_str("--input", parse_path);
+    assert_eq!(value.unwrap().unwrap().display().to_string(), "text.txt");
 }
 
 #[test]
@@ -198,40 +220,40 @@ fn missing_option_value_3() {
 #[test]
 fn free_1() {
     let args = Arguments::from_vec(to_vec(&[]));
-    assert_eq!(args.free().unwrap(), to_vec(&[]));
+    assert_eq!(args.free_os().unwrap(), to_vec(&[]));
 }
 
 #[test]
 fn free_2() {
     let args = Arguments::from_vec(to_vec(&["text.txt"]));
-    assert_eq!(args.free().unwrap(), to_vec(&["text.txt"]));
+    assert_eq!(args.free_os().unwrap(), to_vec(&["text.txt"]));
 }
 
 #[test]
 fn free_3() {
     let args = Arguments::from_vec(to_vec(&["text.txt", "text2.txt"]));
-    assert_eq!(args.free().unwrap(), to_vec(&["text.txt", "text2.txt"]));
+    assert_eq!(args.free_os().unwrap(), to_vec(&["text.txt", "text2.txt"]));
 }
 
 #[test]
 fn free_4() {
     let mut args = Arguments::from_vec(to_vec(&["-h", "text.txt", "text2.txt"]));
     assert!(args.contains("-h"));
-    assert_eq!(args.free().unwrap(), to_vec(&["text.txt", "text2.txt"]));
+    assert_eq!(args.free_os().unwrap(), to_vec(&["text.txt", "text2.txt"]));
 }
 
 #[test]
 fn free_5() {
     let mut args = Arguments::from_vec(to_vec(&["text.txt", "-h", "text2.txt"]));
     assert!(args.contains("-h"));
-    assert_eq!(args.free().unwrap(), to_vec(&["text.txt", "text2.txt"]));
+    assert_eq!(args.free_os().unwrap(), to_vec(&["text.txt", "text2.txt"]));
 }
 
 #[test]
 fn free_6() {
     let mut args = Arguments::from_vec(to_vec(&["text.txt", "text2.txt", "-h"]));
     assert!(args.contains("-h"));
-    assert_eq!(args.free().unwrap(), to_vec(&["text.txt", "text2.txt"]));
+    assert_eq!(args.free_os().unwrap(), to_vec(&["text.txt", "text2.txt"]));
 }
 
 #[test]
@@ -284,5 +306,5 @@ fn unused_args_2() {
 #[test]
 fn stdin() {
     let args = Arguments::from_vec(to_vec(&["-"]));
-    assert_eq!(args.free().unwrap(), to_vec(&["-"]));
+    assert_eq!(args.free_os().unwrap(), to_vec(&["-"]));
 }

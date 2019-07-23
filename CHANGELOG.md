@@ -6,13 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- `free_from_str` and `free_from_fn`.
+- Non UTF-8 arguments support.
+- `free_from_str`, `free_from_fn` and `free_from_os_str`.
+- `value_from_os_str`.
 
 ### Changed
 - `value_from_fn` allows any error type that implements `Display` now
   and not only `String`.
-- `from_args` -> `from_vec`.
-- `from_env` returns a `Result` now.
+- `from_args` -> `from_vec`. And it accepts `Vec<OsString>` now.
 - The `Error` enum.
 
 ### Fixed

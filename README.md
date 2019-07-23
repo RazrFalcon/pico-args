@@ -7,8 +7,10 @@ An ultra simple CLI arguments parser.
 
 - Only flags, options and free arguments are supported.
 - Arguments can be separated by a space or `=`.
+- Non UTF-8 arguments are supported.
 - No help generation.
 - No combined flags (like `-vvv` or `-abc`).
+- Arguments are parsed in a linear order. From first to last.
 
 ### Example
 
@@ -28,7 +30,7 @@ fn parse_width(s: &str) -> Result<u32, String> {
     s.parse().map_err(|_| "not a number".to_string())
 }
 
-fn main() -> Result<(), Box<std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = Arguments::from_env();
     // Arguments can be parsed in any order.
     let args = Args {
@@ -65,7 +67,7 @@ There are a lot of arguments parsing implementations, but we will use only these
 
 | | `pico-args` | `clap` | `gumdrop` | `structopt` |
 ---|---|---|---|---
-| Binary overhead | 20.8KiB | 435.1KiB | 23.0KiB | 436.8KiB |
+| Binary overhead | 19.3KiB | 435.1KiB | 23.0KiB | 436.8KiB |
 | Build time | 0.9s | 15s | 31s | 27s |
 | Tested version | 0.1.0 | 2.33.0 | 0.6.0 | 0.2.18 |
 
