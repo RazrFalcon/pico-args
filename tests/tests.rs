@@ -161,6 +161,15 @@ fn eq_option_err_06() {
 }
 
 #[test]
+fn duplicated_options_01() {
+    let mut args = Arguments::from_vec(to_vec(&["--name", "test1", "--name", "test2"]));
+    let value1: Option<String> = args.value_from_str("--name").unwrap();
+    let value2: Option<String> = args.value_from_str("--name").unwrap();
+    assert_eq!(value1.unwrap(), "test1");
+    assert_eq!(value2.unwrap(), "test2");
+}
+
+#[test]
 fn missing_option_value_1() {
     let mut args = Arguments::from_vec(to_vec(&["--value"]));
     let value: Result<Option<u32>, Error> = args.value_from_str("--value");
