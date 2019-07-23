@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - `value_from_fn` allows any error type that implements `Display` now
   and not only `String`.
+- `from_args` -> `from_vec`.
 - The `Error` enum.
 
 [Unreleased]: https://github.com/RazrFalcon/ttf-parser/compare/v0.1.0...HEAD

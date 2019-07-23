@@ -139,7 +139,7 @@ impl Arguments {
     /// Creates a parser from the vector of arguments.
     ///
     /// The executable path *must* be removed.
-    pub fn from_args(args: Vec<String>) -> Self {
+    pub fn from_vec(args: Vec<String>) -> Self {
         Arguments(args)
     }
 
