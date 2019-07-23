@@ -20,7 +20,7 @@ fn main() {
 }
 
 fn submain() -> Result<(), pico_args::Error> {
-    let mut args = Arguments::from_env();
+    let mut args = Arguments::from_env()?;
     let args = AppArgs {
         help: args.contains(["-h", "--help"]),
         number: args.value_from_str("--number")?.unwrap_or(5),

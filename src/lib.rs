@@ -25,7 +25,7 @@ fn parse_width(s: &str) -> Result<u32, String> {
 }
 
 fn main() -> Result<(), Box<std::error::Error>> {
-    let mut args = Arguments::from_env();
+    let mut args = Arguments::from_env()?;
     // Arguments can be parsed in any order.
     let args = Args {
         // You can use a slice for multiple commands
@@ -61,7 +61,7 @@ There are a lot of arguments parsing implementations, but we will use only these
 
 | | `pico-args` | `clap` | `gumdrop` | `structopt` |
 ---|---|---|---|---
-| Binary overhead | 20.8KiB | 435.1KiB | 23.0KiB | 436.8KiB |
+| Binary overhead | 19.3KiB | 435.1KiB | 23.0KiB | 436.8KiB |
 | Build time | 0.9s | 15s | 31s | 27s |
 | Tested version | 0.1.0 | 2.33.0 | 0.6.0 | 0.2.18 |
 
@@ -83,6 +83,9 @@ use std::str::FromStr;
 /// A list of possible errors.
 #[derive(Clone, Debug)]
 pub enum Error {
+    /// Arguments must be a valid UTF-8 strings.
+    NonUtf8Argument(usize),
+
     /// An option without a value.
     OptionWithoutAValue(&'static str),
 
@@ -101,6 +104,9 @@ pub enum Error {
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            Error::NonUtf8Argument(n) => {
+                write!(f, "argument #{} is not an UTF-8 string", n)
+            }
             Error::OptionWithoutAValue(key) => {
                 write!(f, "the '{}' option doesn't have an associated value", key)
             }
@@ -146,10 +152,27 @@ impl Arguments {
     /// Creates a parser from `env::args()`.
     ///
     /// The executable path will be removed.
-    pub fn from_env() -> Self {
-        let mut args: Vec<String> = std::env::args().collect();
-        args.remove(0);
-        Arguments(args)
+    pub fn from_env() -> Result<Self, Error> {
+        // std::env::args() will panic if any of the arguments
+        // is not a valid UTF-8 string.
+        // So we are using our own safe wrapper.
+
+        let mut args = Vec::new();
+        for (i, arg) in std::env::args_os().enumerate() {
+            match arg.into_string() {
+                Ok(s) => {
+                    // Skip the first argument, which is an exe path.
+                    if i != 0 {
+                        args.push(s);
+                    }
+                }
+                Err(_) => {
+                    return Err(Error::NonUtf8Argument(i));
+                }
+            }
+        }
+
+        Ok(Arguments(args))
     }
 
     /// Checks that arguments contains a specified flag.
