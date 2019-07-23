@@ -61,7 +61,7 @@ There are a lot of arguments parsing implementations, but we will use only these
 
 | | `pico-args` | `clap` | `gumdrop` | `structopt` |
 ---|---|---|---|---
-| Binary overhead | 20.3KiB | 435.1KiB | 23.0KiB | 436.8KiB |
+| Binary overhead | 20.8KiB | 435.1KiB | 23.0KiB | 436.8KiB |
 | Build time | 0.9s | 15s | 31s | 27s |
 | Tested version | 0.1.0 | 2.33.0 | 0.6.0 | 0.2.18 |
 
@@ -86,8 +86,13 @@ pub enum Error {
     /// An option without a value.
     OptionWithoutAValue(&'static str),
 
-    /// An option without a value.
-    OptionValueParsingFailed(&'static str, String),
+    /// Failed to parse a value in a key-value pair.
+    #[allow(missing_docs)]
+    OptionValueParsingFailed { key: &'static str, cause: String },
+
+    /// Failed to parse a free-standing argument.
+    #[allow(missing_docs)]
+    FreeArgumentParsingFailed { argument: String, cause: String },
 
     /// Unused arguments left.
     UnusedArgsLeft(Vec<String>),
@@ -99,8 +104,11 @@ impl Display for Error {
             Error::OptionWithoutAValue(key) => {
                 write!(f, "the '{}' option doesn't have an associated value", key)
             }
-            Error::OptionValueParsingFailed(key, e) => {
-                write!(f, "failed to parse a '{}' value cause {}", key, e)
+            Error::OptionValueParsingFailed { key, cause } => {
+                write!(f, "failed to parse '{}' value cause {}", key, cause)
+            }
+            Error::FreeArgumentParsingFailed { argument, cause } => {
+                write!(f, "failed to parse '{}' cause {}", argument, cause)
             }
             Error::UnusedArgsLeft(args) => {
                 // Do not use `args.join()`, because it adds 1.2KiB.
@@ -161,9 +169,7 @@ impl Arguments {
         false
     }
 
-    /// Parses a key-value pair.
-    ///
-    /// Uses the `FromStr` trait for value conversion.
+    /// Parses a key-value pair using `FromStr` trait.
     ///
     /// Must be used only once for each option.
     pub fn value_from_str<A, T>(&mut self, keys: A) -> Result<Option<T>, Error>
@@ -175,9 +181,7 @@ impl Arguments {
         self.value_from_fn_impl(keys.into(), FromStr::from_str)
     }
 
-    /// Parses a key-value pair.
-    ///
-    /// Uses a specified function for value conversion.
+    /// Parses a key-value pair using a specified function.
     ///
     /// Must be used only once for each option.
     pub fn value_from_fn<A: Into<Keys>, T, E: Display>(
@@ -210,7 +214,10 @@ impl Arguments {
                     Ok(Some(value))
                 }
                 Err(e) => {
-                    Err(Error::OptionValueParsingFailed(key, error_to_string(e)))
+                    Err(Error::OptionValueParsingFailed {
+                        key,
+                        cause: error_to_string(e),
+                    })
                 }
             }
         } else if let Some((idx, key)) = self.index_of2(keys) {
@@ -252,7 +259,10 @@ impl Arguments {
 
             match f(&value) {
                 Ok(value) => Ok(Some(value)),
-                Err(e) => Err(Error::OptionValueParsingFailed(key, error_to_string(e))),
+                Err(e) => Err(Error::OptionValueParsingFailed {
+                    key,
+                    cause: error_to_string(e),
+                }),
             }
         } else {
             Ok(None)
@@ -286,6 +296,75 @@ impl Arguments {
         None
     }
 
+    /// Parses a free-standing argument using `FromStr` trait.
+    ///
+    /// Must be used only once for each option.
+    ///
+    /// Will return an error, if any flags were left.
+    pub fn free_from_str<T>(&mut self) -> Result<Option<T>, Error>
+        where
+            T: FromStr,
+            <T as FromStr>::Err: Display,
+    {
+        self.free_from_fn(FromStr::from_str)
+    }
+
+    /// Parses a free-standing argument using a specified function.
+    ///
+    /// Must be used only once for each option.
+    ///
+    /// Will return an error, if any flags were left.
+    #[inline(never)]
+    pub fn free_from_fn<T, E: Display>(
+        &mut self,
+        f: fn(&str) -> Result<T, E>,
+    ) -> Result<Option<T>, Error> {
+        self.check_for_flags()?;
+
+        if self.0.is_empty() {
+            Ok(None)
+        } else {
+            // A simple take_first() implementation.
+            let mut value = String::new();
+            std::mem::swap(self.0.first_mut().unwrap(), &mut value);
+            self.0.remove(0);
+
+            match f(&value) {
+                Ok(value) => Ok(Some(value)),
+                Err(e) => Err(Error::FreeArgumentParsingFailed {
+                    argument: value,
+                    cause: error_to_string(e),
+                }),
+            }
+        }
+    }
+
+    /// Returns a list of free arguments.
+    ///
+    /// This list will also include `-`, which indicates stdin.
+    ///
+    /// Will return an error, if any flags were left.
+    pub fn free(self) -> Result<Vec<String>, Error> {
+        self.check_for_flags()?;
+        Ok(self.0)
+    }
+
+    #[inline(never)]
+    fn check_for_flags(&self) -> Result<(), Error> {
+        // Check that there are no flags left.
+        // But allow `-` which is used to indicate stdin.
+        let flags_left: Vec<String> = self.0.iter()
+            .filter(|s| *s != "-" && s.starts_with('-'))
+            .map(String::from)
+            .collect();
+
+        if flags_left.is_empty() {
+            Ok(())
+        } else {
+            Err(Error::UnusedArgsLeft(flags_left))
+        }
+    }
+
     /// Checks that all flags were processed.
     ///
     /// Use it instead of `free()` if you do not expect any free arguments.
@@ -295,24 +374,6 @@ impl Arguments {
         }
 
         Ok(())
-    }
-
-    /// Returns a list of free arguments.
-    ///
-    /// Will return an error, if any flags were left.
-    pub fn free(self) -> Result<Vec<String>, Error> {
-        // Check that no flags left.
-        // But allow `-` which is used to indicate stdin.
-        let flags_left: Vec<String> = self.0.iter()
-            .filter(|s| *s != "-" && s.starts_with('-'))
-            .map(String::from)
-            .collect();
-
-        if !flags_left.is_empty() {
-            return Err(Error::UnusedArgsLeft(flags_left));
-        }
-
-        Ok(self.0)
     }
 }
 

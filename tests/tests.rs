@@ -1,4 +1,6 @@
-use pico_args::Arguments;
+use std::str::FromStr;
+
+use pico_args::*;
 
 fn to_vec(args: &[&str]) -> Vec<String> {
     args.iter().map(|s| s.to_string()).collect()
@@ -113,7 +115,7 @@ fn eq_option_03() {
 #[test]
 fn eq_option_err_01() {
     let mut args = Arguments::from_args(to_vec(&["-w="]));
-    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("-w");
+    let value: Result<Option<u32>, Error> = args.value_from_str("-w");
     assert_eq!(value.unwrap_err().to_string(),
                "the '-w' option doesn't have an associated value");
 }
@@ -121,7 +123,7 @@ fn eq_option_err_01() {
 #[test]
 fn eq_option_err_02() {
     let mut args = Arguments::from_args(to_vec(&["-w='"]));
-    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("-w");
+    let value: Result<Option<u32>, Error> = args.value_from_str("-w");
     assert_eq!(value.unwrap_err().to_string(),
                "the '-w' option doesn't have an associated value");
 }
@@ -129,7 +131,7 @@ fn eq_option_err_02() {
 #[test]
 fn eq_option_err_03() {
     let mut args = Arguments::from_args(to_vec(&["-w=''"]));
-    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("-w");
+    let value: Result<Option<u32>, Error> = args.value_from_str("-w");
     assert_eq!(value.unwrap_err().to_string(),
                "the '-w' option doesn't have an associated value");
 }
@@ -137,7 +139,7 @@ fn eq_option_err_03() {
 #[test]
 fn eq_option_err_04() {
     let mut args = Arguments::from_args(to_vec(&["-w='\""]));
-    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("-w");
+    let value: Result<Option<u32>, Error> = args.value_from_str("-w");
     assert_eq!(value.unwrap_err().to_string(),
                "the '-w' option doesn't have an associated value");
 }
@@ -145,7 +147,7 @@ fn eq_option_err_04() {
 #[test]
 fn eq_option_err_05() {
     let mut args = Arguments::from_args(to_vec(&["-w='10\""]));
-    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("-w");
+    let value: Result<Option<u32>, Error> = args.value_from_str("-w");
     assert_eq!(value.unwrap_err().to_string(),
                "the '-w' option doesn't have an associated value");
 }
@@ -153,7 +155,7 @@ fn eq_option_err_05() {
 #[test]
 fn eq_option_err_06() {
     let mut args = Arguments::from_args(to_vec(&["-w-10"]));
-    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("-w");
+    let value: Result<Option<u32>, Error> = args.value_from_str("-w");
     assert_eq!(value.unwrap_err().to_string(),
                "the '-w' option doesn't have an associated value");
 }
@@ -161,7 +163,7 @@ fn eq_option_err_06() {
 #[test]
 fn missing_option_value_1() {
     let mut args = Arguments::from_args(to_vec(&["--value"]));
-    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("--value");
+    let value: Result<Option<u32>, Error> = args.value_from_str("--value");
     assert_eq!(value.unwrap_err().to_string(),
                "the '--value' option doesn't have an associated value");
 }
@@ -169,7 +171,7 @@ fn missing_option_value_1() {
 #[test]
 fn missing_option_value_2() {
     let mut args = Arguments::from_args(to_vec(&["--value"]));
-    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("--value");
+    let value: Result<Option<u32>, Error> = args.value_from_str("--value");
     assert!(value.is_err()); // ignore error
     // the `--value` flag should not be removed by the previous command
     assert!(args.finish().is_err());
@@ -178,7 +180,7 @@ fn missing_option_value_2() {
 #[test]
 fn missing_option_value_3() {
     let mut args = Arguments::from_args(to_vec(&["--value", "q"]));
-    let value: Result<Option<u32>, pico_args::Error> = args.value_from_str("--value");
+    let value: Result<Option<u32>, Error> = args.value_from_str("--value");
     assert!(value.is_err()); // ignore error
     // the `--value` flag should not be removed by the previous command
     assert!(args.finish().is_err());
@@ -221,6 +223,39 @@ fn free_6() {
     let mut args = Arguments::from_args(to_vec(&["text.txt", "text2.txt", "-h"]));
     assert!(args.contains("-h"));
     assert_eq!(args.free().unwrap(), to_vec(&["text.txt", "text2.txt"]));
+}
+
+#[test]
+fn free_from_fn_01() {
+    let mut args = Arguments::from_args(to_vec(&["5"]));
+    assert_eq!(args.free_from_fn(u32::from_str).unwrap(), Some(5));
+}
+
+#[test]
+fn free_from_fn_02() {
+    let mut args = Arguments::from_args(to_vec(&[]));
+    assert_eq!(args.free_from_fn(u32::from_str).unwrap(), None);
+}
+
+#[test]
+fn free_from_fn_03() {
+    let mut args = Arguments::from_args(to_vec(&["-h"]));
+    assert_eq!(args.free_from_fn(u32::from_str).unwrap_err().to_string(),
+               "unused arguments left: -h");
+}
+
+#[test]
+fn free_from_fn_04() {
+    let mut args = Arguments::from_args(to_vec(&["a"]));
+    assert_eq!(args.free_from_fn(u32::from_str).unwrap_err().to_string(),
+               "failed to parse 'a' cause invalid digit found in string");
+}
+
+#[test]
+fn free_from_str_01() {
+    let mut args = Arguments::from_args(to_vec(&["5"]));
+    let value: Result<Option<u32>, Error> = args.free_from_str();
+    assert_eq!(value.unwrap(), Some(5));
 }
 
 #[test]

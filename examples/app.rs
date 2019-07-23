@@ -9,8 +9,8 @@ struct AppArgs {
     free: Vec<String>,
 }
 
-fn parse_width(s: &str) -> Result<u32, String> {
-    s.parse().map_err(|_| "not a number".to_string())
+fn parse_width(s: &str) -> Result<u32, &'static str> {
+    s.parse().map_err(|_| "not a number")
 }
 
 fn main() {
@@ -19,7 +19,7 @@ fn main() {
     }
 }
 
-fn submain() -> Result<(), Box<std::error::Error>> {
+fn submain() -> Result<(), pico_args::Error> {
     let mut args = Arguments::from_env();
     let args = AppArgs {
         help: args.contains(["-h", "--help"]),
