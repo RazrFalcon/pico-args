@@ -61,11 +61,11 @@ There are a lot of arguments parsing implementations, but we will use only these
 - [gumdrop](https://crates.io/crates/gumdrop) - a simple parser that uses procedural macros
 - [structopt](https://crates.io/crates/structopt) - a two above combined
 
-| | `pico-args` | `clap` | `gumdrop` | `structopt` |
----|---|---|---|---
-| Binary overhead | 19.3KiB | 435.1KiB | 23.0KiB | 436.8KiB |
-| Build time | 0.9s | 15s | 31s | 27s |
-| Tested version | 0.1.0 | 2.33.0 | 0.6.0 | 0.2.18 |
+|                   | `pico-args` | `clap`   | `gumdrop` | `structopt` |
+|-------------------|-------------|----------|-----------|-------------|
+| Binary overhead   | 20.0KiB     | 435.1KiB | 23.0KiB   | 436.8KiB    |
+| Build time        | 0.9s        | 15s      | 31s       | 27s         |
+| Tested version    | 0.1.0       | 2.33.0   | 0.6.0     | 0.2.18      |
 
 - Binary size overhead was measured by subtracting the `.text` section size of an app with
   arguments parsing and a hello world app.
@@ -138,6 +138,13 @@ impl Display for Error {
 }
 
 impl std::error::Error for Error {}
+
+
+#[derive(Clone, Copy, PartialEq)]
+enum PairKind {
+    SingleArgument,
+    TwoArguments,
+}
 
 
 /// An arguments parser.
@@ -213,28 +220,50 @@ impl Arguments {
         keys: Keys,
         f: fn(&str) -> Result<T, E>,
     ) -> Result<Option<T>, Error> {
+        match self.find_value(keys)? {
+            Some((value, kind, idx)) => {
+                match f(value) {
+                    Ok(value) => {
+                        // Remove only when all checks are passed.
+                        self.0.remove(idx);
+                        if kind == PairKind::TwoArguments {
+                            self.0.remove(idx);
+                        }
+
+                        Ok(Some(value))
+                    }
+                    Err(e) => {
+                        Err(Error::Utf8ArgumentParsingFailed {
+                            value: value.to_string(),
+                            cause: error_to_string(e),
+                        })
+                    }
+                }
+            }
+            None => Ok(None),
+        }
+    }
+
+    // The whole logic should be type-independent to prevent monomorphization.
+    #[inline(never)]
+    fn find_value(
+        &mut self,
+        keys: Keys,
+    ) -> Result<Option<(&str, PairKind, usize)>, Error> {
         if let Some((idx, key)) = self.index_of(keys) {
             // Parse a `--key value` pair.
 
-            let value = self.get_str(key, idx + 1)?;
-            match f(value) {
-                Ok(value) => {
-                    // Remove only when all checks are passed.
-                    self.0.remove(idx);
-                    self.0.remove(idx);
-                    Ok(Some(value))
-                }
-                Err(e) => {
-                    Err(Error::Utf8ArgumentParsingFailed {
-                        value: value.to_string(),
-                        cause: error_to_string(e),
-                    })
-                }
-            }
+            let value = match self.0.get(idx + 1) {
+                Some(v) => v,
+                None => return Err(Error::OptionWithoutAValue(key)),
+            };
+
+            let value = os_to_str(value)?;
+            Ok(Some((value, PairKind::TwoArguments, idx)))
         } else if let Some((idx, key)) = self.index_of2(keys) {
             // Parse a `--key=value` pair.
 
-            let value = self.0.remove(idx);
+            let value = &self.0[idx];
 
             // Only UTF-8 strings are supported in this method.
             let value = value.to_str().ok_or_else(|| Error::NonUtf8Argument)?;
@@ -273,13 +302,7 @@ impl Arguments {
                 return Err(Error::OptionWithoutAValue(key));
             }
 
-            match f(&value) {
-                Ok(value) => Ok(Some(value)),
-                Err(e) => Err(Error::Utf8ArgumentParsingFailed {
-                    value: value.to_string(),
-                    cause: error_to_string(e),
-                }),
-            }
+            Ok(Some((value, PairKind::SingleArgument, idx)))
         } else {
             Ok(None)
         }
@@ -336,6 +359,9 @@ impl Arguments {
 
     #[inline(never)]
     fn index_of<'a>(&self, keys: Keys) -> Option<(usize, &'a str)> {
+        // Do not unroll loop to save space, because it creates a bigger file.
+        // Which is strange, since `index_of2` actually benefits from it.
+
         for key in &keys.0 {
             if !key.is_empty() {
                 if let Some(i) = self.0.iter().position(|v| v == key) {
@@ -349,25 +375,21 @@ impl Arguments {
 
     #[inline(never)]
     fn index_of2<'a>(&self, keys: Keys) -> Option<(usize, &'a str)> {
-        for key in &keys.0 {
-            if !key.is_empty() {
-                if let Some(i) = self.0.iter().position(|v| os_starts_with(v, key)) {
-                    return Some((i, key));
-                }
+        // Loop unroll to save space.
+
+        if !keys.first().is_empty() {
+            if let Some(i) = self.0.iter().position(|v| os_starts_with(v, keys.first())) {
+                return Some((i, keys.first()));
+            }
+        }
+
+        if !keys.second().is_empty() {
+            if let Some(i) = self.0.iter().position(|v| os_starts_with(v, keys.second())) {
+                return Some((i, keys.second()));
             }
         }
 
         None
-    }
-
-    #[inline(never)]
-    fn get_str(&self, key: &'static str, idx: usize) -> Result<&str, Error> {
-        let value = match self.0.get(idx) {
-            Some(v) => v,
-            None => return Err(Error::OptionWithoutAValue(key)),
-        };
-
-        os_to_str(value)
     }
 
     /// Parses a free-standing argument using `FromStr` trait.
@@ -457,12 +479,21 @@ impl Arguments {
     pub fn free(self) -> Result<Vec<String>, Error> {
         self.check_for_flags()?;
 
-        let mut args = Vec::new();
-        for arg in self.0 {
-            let arg = os_to_str(arg.as_os_str())?.to_string();
-            args.push(arg);
+        // This code produces 1.7KiB
+        //
+        // let mut args = Vec::new();
+        // for arg in self.0 {
+        //     let arg = os_to_str(arg.as_os_str())?.to_string();
+        //     args.push(arg);
+        // }
+
+        // And this one is only 874B
+
+        for arg in &self.0 {
+            os_to_str(arg.as_os_str())?;
         }
 
+        let args = self.0.iter().map(|a| a.to_str().unwrap().to_string()).collect();
         Ok(args)
     }
 
@@ -535,7 +566,7 @@ fn os_starts_with(text: &OsStr, prefix: &str) -> bool {
     }
 }
 
-#[inline(never)]
+#[inline]
 fn ends_with(text: &str, c: u8) -> bool {
     if text.is_empty() {
         false
@@ -544,7 +575,7 @@ fn ends_with(text: &str, c: u8) -> bool {
     }
 }
 
-#[inline(never)]
+#[inline]
 fn os_to_str(text: &OsStr) -> Result<&str, Error> {
     text.to_str().ok_or_else(|| Error::NonUtf8Argument)
 }
@@ -556,6 +587,18 @@ fn os_to_str(text: &OsStr) -> Result<&str, Error> {
 #[doc(hidden)]
 #[derive(Clone, Copy, Debug)]
 pub struct Keys([&'static str; 2]);
+
+impl Keys {
+    #[inline]
+    fn first(&self) -> &'static str {
+        self.0[0]
+    }
+
+    #[inline]
+    fn second(&self) -> &'static str {
+        self.0[1]
+    }
+}
 
 impl From<[&'static str; 2]> for Keys {
     #[inline]
