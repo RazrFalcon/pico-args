@@ -63,8 +63,8 @@ There are a lot of arguments parsing implementations, but we will use only these
 
 |                   | `pico-args` | `clap`   | `gumdrop` | `structopt` |
 |-------------------|-------------|----------|-----------|-------------|
-| Binary overhead   | 20.0KiB     | 435.1KiB | 23.0KiB   | 436.8KiB    |
-| Build time        | 0.9s        | 15s      | 31s       | 27s         |
+| Binary overhead   | 20.6KiB     | 435.1KiB | 23.0KiB   | 436.8KiB    |
+| Build time        | 1s          | 15s      | 31s       | 27s         |
 | Tested version    | 0.1.0       | 2.33.0   | 0.6.0     | 0.2.18      |
 
 - Binary size overhead was measured by subtracting the `.text` section size of an app with
@@ -78,9 +78,9 @@ There are a lot of arguments parsing implementations, but we will use only these
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
+use std::ffi::{OsString, OsStr};
 use std::fmt::{self, Display};
 use std::str::FromStr;
-use std::ffi::{OsString, OsStr};
 
 
 /// A list of possible errors.
@@ -90,7 +90,7 @@ pub enum Error {
     NonUtf8Argument,
 
     /// An option without a value.
-    OptionWithoutAValue(&'static str),
+    OptionWithoutAValue(String),
 
     /// Failed to parse a UTF-8 free-standing argument.
     #[allow(missing_docs)]
@@ -171,7 +171,7 @@ impl Arguments {
     /// Checks that arguments contain a specified flag.
     ///
     /// Must be used only once for each flag.
-    pub fn contains<A: Into<Keys>>(&mut self, keys: A) -> bool {
+    pub fn contains<'a, A: Into<Keys<'a>>>(&mut self, keys: A) -> bool {
         self.contains_impl(keys.into())
     }
 
@@ -188,9 +188,9 @@ impl Arguments {
     /// Parses a key-value pair using `FromStr` trait.
     ///
     /// This is a shorthand for `value_from_fn("--key", FromStr::from_str)`
-    pub fn value_from_str<A, T>(&mut self, keys: A) -> Result<Option<T>, Error>
+    pub fn value_from_str<'a, A, T>(&mut self, keys: A) -> Result<Option<T>, Error>
     where
-        A: Into<Keys>,
+        A: Into<Keys<'a>>,
         T: FromStr,
         <T as FromStr>::Err: Display,
     {
@@ -206,7 +206,7 @@ impl Arguments {
     /// - When key or value is not a UTF-8 string. Use `value_from_os_str` instead.
     /// - When value parsing failed.
     /// - When key-value pair is separated not by space or `=`.
-    pub fn value_from_fn<A: Into<Keys>, T, E: Display>(
+    pub fn value_from_fn<'a, A: Into<Keys<'a>>, T, E: Display>(
         &mut self,
         keys: A,
         f: fn(&str) -> Result<T, E>,
@@ -255,7 +255,7 @@ impl Arguments {
 
             let value = match self.0.get(idx + 1) {
                 Some(v) => v,
-                None => return Err(Error::OptionWithoutAValue(key)),
+                None => return Err(Error::OptionWithoutAValue(key.to_string())),
             };
 
             let value = os_to_str(value)?;
@@ -273,7 +273,7 @@ impl Arguments {
                 value_range.start += 1;
             } else {
                 // Key must be followed by `=`.
-                return Err(Error::OptionWithoutAValue(key));
+                return Err(Error::OptionWithoutAValue(key.to_string()));
             }
 
             // Check for quoted value.
@@ -285,21 +285,21 @@ impl Arguments {
                     if ends_with(&value[value_range.start..], c) {
                         value_range.end -= 1;
                     } else {
-                        return Err(Error::OptionWithoutAValue(key));
+                        return Err(Error::OptionWithoutAValue(key.to_string()));
                     }
                 }
             }
 
             // Check length, otherwise String::drain will panic.
             if value_range.end - value_range.start == 0 {
-                return Err(Error::OptionWithoutAValue(key));
+                return Err(Error::OptionWithoutAValue(key.to_string()));
             }
 
             // Extract `value` from `--key="value"`.
             let value = &value[value_range];
 
             if value.is_empty() {
-                return Err(Error::OptionWithoutAValue(key));
+                return Err(Error::OptionWithoutAValue(key.to_string()));
             }
 
             Ok(Some((value, PairKind::SingleArgument, idx)))
@@ -319,7 +319,7 @@ impl Arguments {
     /// - When value parsing failed.
     /// - When key-value pair is separated not by space.
     ///   Only `value_from_fn` supports `=` separator.
-    pub fn value_from_os_str<A: Into<Keys>, T, E: Display>(
+    pub fn value_from_os_str<'a, A: Into<Keys<'a>>, T, E: Display>(
         &mut self,
         keys: A,
         f: fn(&OsStr) -> Result<T, E>,
@@ -338,7 +338,7 @@ impl Arguments {
 
             let value = match self.0.get(idx + 1) {
                 Some(v) => v,
-                None => return Err(Error::OptionWithoutAValue(key)),
+                None => return Err(Error::OptionWithoutAValue(key.to_string())),
             };
 
             match f(value) {
@@ -358,7 +358,7 @@ impl Arguments {
     }
 
     #[inline(never)]
-    fn index_of<'a>(&self, keys: Keys) -> Option<(usize, &'a str)> {
+    fn index_of<'a, 'b>(&self, keys: Keys<'a>) -> Option<(usize, &'a str)> {
         // Do not unroll loop to save space, because it creates a bigger file.
         // Which is strange, since `index_of2` actually benefits from it.
 
@@ -374,7 +374,7 @@ impl Arguments {
     }
 
     #[inline(never)]
-    fn index_of2<'a>(&self, keys: Keys) -> Option<(usize, &'a str)> {
+    fn index_of2<'a>(&self, keys: Keys<'a>) -> Option<(usize, &'a str)> {
         // Loop unroll to save space.
 
         if !keys.first().is_empty() {
@@ -396,9 +396,9 @@ impl Arguments {
     ///
     /// This is a shorthand for `free_from_fn(FromStr::from_str)`
     pub fn free_from_str<T>(&mut self) -> Result<Option<T>, Error>
-        where
-            T: FromStr,
-            <T as FromStr>::Err: Display,
+    where
+        T: FromStr,
+        <T as FromStr>::Err: Display,
     {
         self.free_from_fn(FromStr::from_str)
     }
@@ -586,23 +586,23 @@ fn os_to_str(text: &OsStr) -> Result<&str, Error> {
 /// Should not be used directly.
 #[doc(hidden)]
 #[derive(Clone, Copy, Debug)]
-pub struct Keys([&'static str; 2]);
+pub struct Keys<'a>([&'a str; 2]);
 
-impl Keys {
+impl<'a> Keys<'a> {
     #[inline]
-    fn first(&self) -> &'static str {
+    fn first(&self) -> &'a str {
         self.0[0]
     }
 
     #[inline]
-    fn second(&self) -> &'static str {
+    fn second(&self) -> &'a str {
         self.0[1]
     }
 }
 
-impl From<[&'static str; 2]> for Keys {
+impl<'a> From<[&'a str; 2]> for Keys<'a> {
     #[inline]
-    fn from(v: [&'static str; 2]) -> Self {
+    fn from(v: [&'a str; 2]) -> Self {
         debug_assert!(v[0].starts_with("-"), "an argument should start with '-'");
         debug_assert!(!v[0].starts_with("--"), "the first argument should be short");
         debug_assert!(v[1].starts_with("--"), "the second argument should be long");
@@ -611,9 +611,9 @@ impl From<[&'static str; 2]> for Keys {
     }
 }
 
-impl From<&'static str> for Keys {
+impl<'a> From<&'a str> for Keys<'a> {
     #[inline]
-    fn from(v: &'static str) -> Self {
+    fn from(v: &'a str) -> Self {
         debug_assert!(v.starts_with("-"), "an argument should start with '-'");
 
         Keys([v, ""])
