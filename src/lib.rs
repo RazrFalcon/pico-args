@@ -5,6 +5,7 @@ An ultra simple CLI arguments parser.
 - Arguments can be separated by a space or `=`.
 - No help generation.
 - No combined flags (like `-vvv` or `-abc`).
+- Arguments are parsed in a linear order. From first to last.
 
 ## Example
 
