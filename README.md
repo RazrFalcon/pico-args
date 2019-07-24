@@ -56,7 +56,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 The core idea of `pico-args` is to provide some "sugar" for arguments parsing without
 a lot of overhead (binary or compilation time wise).
-There are no point in comparing parsing features, because `pico-args` supports
+There are no point in comparing parsing features since `pico-args` supports
 only the bare minimum. So we will compare only the size overhead and compilation time.
 
 There are a lot of arguments parsing implementations, but we will use only these one:
@@ -67,14 +67,14 @@ There are a lot of arguments parsing implementations, but we will use only these
 
 |                   | `pico-args` | `clap`   | `gumdrop` | `structopt` |
 |-------------------|-------------|----------|-----------|-------------|
-| Binary overhead   | 20.0KiB     | 435.1KiB | 23.0KiB   | 436.8KiB    |
-| Build time        | 0.9s        | 15s      | 31s       | 27s         |
+| Binary overhead   | 20.6KiB     | 435.1KiB | 23.0KiB   | 436.8KiB    |
+| Build time        | 1s          | 15s      | 31s       | 27s         |
 | Tested version    | 0.1.0       | 2.33.0   | 0.6.0     | 0.2.18      |
 
 - Binary size overhead was measured by subtracting the `.text` section size of an app with
   arguments parsing and a hello world app.
 - Build time was measured using `hyperfine 'cargo clean; cargo build --release'`.
-- Test projects can be found in `examples/`.
+- Test projects can be found in `test-apps/`.
 
 ### License
 
