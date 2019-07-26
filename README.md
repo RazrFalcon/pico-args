@@ -67,7 +67,7 @@ There are a lot of arguments parsing implementations, but we will use only these
 
 |                   | `pico-args` | `clap`   | `gumdrop` | `structopt` |
 |-------------------|-------------|----------|-----------|-------------|
-| Binary overhead   | 20.6KiB     | 435.1KiB | 23.0KiB   | 436.8KiB    |
+| Binary overhead   | 20.0KiB     | 435.1KiB | 23.0KiB   | 436.8KiB    |
 | Build time        | 1s          | 15s      | 31s       | 27s         |
 | Tested version    | 0.1.0       | 2.33.0   | 0.6.0     | 0.2.18      |
 
