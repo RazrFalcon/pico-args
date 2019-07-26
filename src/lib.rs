@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```
 */
 
-#![doc(html_root_url = "https://docs.rs/pico-args/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/pico-args/0.2.0")]
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
