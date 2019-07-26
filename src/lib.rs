@@ -354,13 +354,13 @@ impl Arguments {
         // Loop unroll to save space.
 
         if !keys.first().is_empty() {
-            if let Some(i) = self.0.iter().position(|v| os_starts_with(v, keys.first())) {
+            if let Some(i) = self.0.iter().position(|v| starts_with_plus_eq(v, keys.first())) {
                 return Some((i, keys.first()));
             }
         }
 
         if !keys.second().is_empty() {
-            if let Some(i) = self.0.iter().position(|v| os_starts_with(v, keys.second())) {
+            if let Some(i) = self.0.iter().position(|v| starts_with_plus_eq(v, keys.second())) {
                 return Some((i, keys.second()));
             }
         }
@@ -535,11 +535,16 @@ fn error_to_string<E: Display>(e: E) -> String {
 }
 
 #[inline(never)]
-fn os_starts_with(text: &OsStr, prefix: &str) -> bool {
-    match text.to_str() {
-        Some(s) => s.get(0..prefix.len()) == Some(prefix),
-        None => false,
+fn starts_with_plus_eq(text: &OsStr, prefix: &str) -> bool {
+    if let Some(s) = text.to_str() {
+        if s.get(0..prefix.len()) == Some(prefix) {
+            if s.as_bytes().get(prefix.len()) == Some(&b'=') {
+                return true;
+            }
+        }
     }
+
+    false
 }
 
 #[inline]

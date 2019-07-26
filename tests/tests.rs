@@ -114,6 +114,13 @@ fn eq_option_03() {
 }
 
 #[test]
+fn eq_option_04() {
+    let mut args = Arguments::from_vec(to_vec(&["--width2=15", "--width=10"]));
+    let value: Option<u32> = args.value_from_str("--width").unwrap();
+    assert_eq!(value.unwrap(), 10);
+}
+
+#[test]
 fn eq_option_err_01() {
     let mut args = Arguments::from_vec(to_vec(&["-w="]));
     let value: Result<Option<u32>, Error> = args.value_from_str("-w");
@@ -157,8 +164,7 @@ fn eq_option_err_05() {
 fn eq_option_err_06() {
     let mut args = Arguments::from_vec(to_vec(&["-w-10"]));
     let value: Result<Option<u32>, Error> = args.value_from_str("-w");
-    assert_eq!(value.unwrap_err().to_string(),
-               "the '-w' option doesn't have an associated value");
+    assert_eq!(value.unwrap(), None);
 }
 
 #[test]
