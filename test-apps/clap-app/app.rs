@@ -39,13 +39,17 @@ fn main() {
             .index(1))
         .get_matches();
 
-    let args = AppArgs {
+    let mut args = AppArgs {
         help: matches.is_present("help"),
         number: value_t!(matches, "number", u32).unwrap(),
         opt_number: value_t!(matches, "opt-number", u32).ok(),
         width: value_t!(matches, "width", u32).unwrap(),
-        free: vec![matches.value_of("input").unwrap().to_string()],
+        free: Vec::new(),
     };
+
+    if let Some(arg) = matches.value_of("input") {
+        args.free.push(arg.to_string());
+    }
 
     println!("{:#?}", args);
 }
