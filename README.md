@@ -15,8 +15,6 @@ An ultra simple CLI arguments parser.
 ### Example
 
 ```rust
-use pico_args::Arguments;
-
 struct Args {
     help: bool,
     version: bool,
@@ -31,7 +29,7 @@ fn parse_width(s: &str) -> Result<u32, String> {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut args = Arguments::from_env();
+    let mut args = pico_args::Arguments::from_env();
     // Arguments can be parsed in any order.
     let args = Args {
         // You can use a slice for multiple commands
