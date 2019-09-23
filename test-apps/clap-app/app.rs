@@ -25,7 +25,7 @@ fn main() {
             .long("help"))
         .arg(Arg::with_name("number")
             .long("number")
-            .default_value("5")
+            .required(true)
             .takes_value(true))
         .arg(Arg::with_name("opt-number")
             .long("opt-number")

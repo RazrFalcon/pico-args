@@ -5,7 +5,7 @@ struct AppArgs {
     #[options(help = "")]
     help: bool,
 
-    #[options(no_short, help = "", default = "5")]
+    #[options(no_short, required, help = "")]
     number: u32,
 
     #[options(no_short, help = "")]

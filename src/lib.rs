@@ -32,12 +32,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         help: args.contains(["-h", "--help"]),
         // or just a string for a single one.
         version: args.contains("-V"),
-        // Parses a value that implements `FromStr`.
-        number: args.value_from_str("--number")?.unwrap_or(5),
         // Parses an optional value that implements `FromStr`.
-        opt_number: args.value_from_str("--opt-number")?,
-        // Parses a value using a specified function.
-        width: args.value_from_fn("--width", parse_width)?.unwrap_or(10),
+        number: args.opt_value_from_str("--number")?.unwrap_or(5),
+        // Parses an optional value that implements `FromStr`.
+        opt_number: args.opt_value_from_str("--opt-number")?,
+        // Parses an optional value using a specified function.
+        width: args.opt_value_from_fn("--width", parse_width)?.unwrap_or(10),
         // Will return all free arguments or an error if any flags are left.
         free: args.free()?,
     };
@@ -63,6 +63,9 @@ pub enum Error {
     /// Arguments must be a valid UTF-8 strings.
     NonUtf8Argument,
 
+    /// A missing option.
+    MissingOption(Keys),
+
     /// An option without a value.
     OptionWithoutAValue(&'static str),
 
@@ -83,6 +86,13 @@ impl Display for Error {
         match self {
             Error::NonUtf8Argument => {
                 write!(f, "argument is not a UTF-8 string")
+            }
+            Error::MissingOption(key) => {
+                if key.second().is_empty() {
+                    write!(f, "the '{}' option must be set", key.first())
+                } else {
+                    write!(f, "the '{}/{}' option must be set", key.first(), key.second())
+                }
             }
             Error::OptionWithoutAValue(key) => {
                 write!(f, "the '{}' option doesn't have an associated value", key)
@@ -162,7 +172,7 @@ impl Arguments {
     /// Parses a key-value pair using `FromStr` trait.
     ///
     /// This is a shorthand for `value_from_fn("--key", FromStr::from_str)`
-    pub fn value_from_str<A, T>(&mut self, keys: A) -> Result<Option<T>, Error>
+    pub fn value_from_str<A, T>(&mut self, keys: A) -> Result<T, Error>
     where
         A: Into<Keys>,
         T: FromStr,
@@ -177,6 +187,7 @@ impl Arguments {
     ///
     /// # Errors
     ///
+    /// - When option is not present.
     /// - When key or value is not a UTF-8 string. Use `value_from_os_str` instead.
     /// - When value parsing failed.
     /// - When key-value pair is separated not by space or `=`.
@@ -184,12 +195,40 @@ impl Arguments {
         &mut self,
         keys: A,
         f: fn(&str) -> Result<T, E>,
+    ) -> Result<T, Error> {
+        let keys = keys.into();
+        match self.opt_value_from_fn(keys, f) {
+            Ok(Some(v)) => Ok(v),
+            Ok(None) => Err(Error::MissingOption(keys)),
+            Err(e) => Err(e),
+        }
+    }
+
+    /// Parses an optional key-value pair using `FromStr` trait.
+    ///
+    /// This is a shorthand for `opt_value_from_fn("--key", FromStr::from_str)`
+    pub fn opt_value_from_str<A, T>(&mut self, keys: A) -> Result<Option<T>, Error>
+        where
+            A: Into<Keys>,
+            T: FromStr,
+            <T as FromStr>::Err: Display,
+    {
+        self.opt_value_from_fn(keys, FromStr::from_str)
+    }
+
+    /// Parses an optional key-value pair using a specified function.
+    ///
+    /// The same as `value_from_fn`, but returns `Ok(None)` when option is not present.
+    pub fn opt_value_from_fn<A: Into<Keys>, T, E: Display>(
+        &mut self,
+        keys: A,
+        f: fn(&str) -> Result<T, E>,
     ) -> Result<Option<T>, Error> {
-        self.value_from_fn_impl(keys.into(), f)
+        self.opt_value_from_fn_impl(keys.into(), f)
     }
 
     #[inline(never)]
-    fn value_from_fn_impl<T, E: Display>(
+    fn opt_value_from_fn_impl<T, E: Display>(
         &mut self,
         keys: Keys,
         f: fn(&str) -> Result<T, E>,
@@ -290,6 +329,7 @@ impl Arguments {
     ///
     /// # Errors
     ///
+    /// - When option is not present.
     /// - When value parsing failed.
     /// - When key-value pair is separated not by space.
     ///   Only `value_from_fn` supports `=` separator.
@@ -297,12 +337,28 @@ impl Arguments {
         &mut self,
         keys: A,
         f: fn(&OsStr) -> Result<T, E>,
+    ) -> Result<T, Error> {
+        let keys = keys.into();
+        match self.opt_value_from_os_str(keys, f) {
+            Ok(Some(v)) => Ok(v),
+            Ok(None) => Err(Error::MissingOption(keys)),
+            Err(e) => Err(e),
+        }
+    }
+
+    /// Parses an optional key-value pair using a specified function.
+    ///
+    /// The same as `value_from_os_str`, but returns `Ok(None)` when option is not present.
+    pub fn opt_value_from_os_str<A: Into<Keys>, T, E: Display>(
+        &mut self,
+        keys: A,
+        f: fn(&OsStr) -> Result<T, E>,
     ) -> Result<Option<T>, Error> {
-        self.value_from_os_str_impl(keys.into(), f)
+        self.opt_value_from_os_str_impl(keys.into(), f)
     }
 
     #[inline(never)]
-    fn value_from_os_str_impl<T, E: Display>(
+    fn opt_value_from_os_str_impl<T, E: Display>(
         &mut self,
         keys: Keys,
         f: fn(&OsStr) -> Result<T, E>,

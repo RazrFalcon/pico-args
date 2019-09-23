@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Required arguments support.
+- `Error::MissingOption` when option is required but not present.
+
+### Changed
+- Rename `value_from_str` into `opt_value_from_str`.
+- Rename `value_from_fn` into `opt_value_from_fn`.
+- Rename `value_from_os_str` into `opt_value_from_os_str`.
+- `value_from_str`, `value_from_fn` and `value_from_os_str` will return `T` and not `Option<T>`
+  from now.
 
 ## [0.2.0] - 2019-07-26
 ### Added

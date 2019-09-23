@@ -5,13 +5,13 @@ struct AppArgs {
     #[structopt(short = "h", long = "help")]
     help: bool,
 
-    #[structopt(long = "number", default_value = "5")]
+    #[structopt(long = "number")]
     number: u32,
 
     #[structopt(long = "opt-number")]
     opt_number: Option<u32>,
 
-    #[structopt(long = "width", default_value = "10", parse(try_from_str = "parse_width"))]
+    #[structopt(long = "width", default_value = "10", parse(try_from_str = parse_width))]
     width: u32,
 
     #[structopt(name = "FILE", parse(from_os_str))]

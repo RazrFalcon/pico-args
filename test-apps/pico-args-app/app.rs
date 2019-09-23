@@ -28,9 +28,9 @@ fn submain() -> Result<(), pico_args::Error> {
     let mut args = Arguments::from_env();
     let args = AppArgs {
         help: args.contains(["-h", "--help"]),
-        number: args.value_from_str("--number")?.unwrap_or(5),
-        opt_number: args.value_from_str("--opt-number")?,
-        width: args.value_from_fn("--width", parse_width)?.unwrap_or(10),
+        number: args.value_from_str("--number")?,
+        opt_number: args.opt_value_from_str("--opt-number")?,
+        width: args.opt_value_from_fn("--width", parse_width)?.unwrap_or(10),
         free: args.free()?,
     };
 

@@ -30,11 +30,18 @@ fn main() {
 fn submain() -> Result<(), pico_args::Error> {
     let mut args = Arguments::from_env();
     let args = AppArgs {
+        // Checks that optional flag is present.
         help: args.contains(["-h", "--help"]),
-        number: args.value_from_str("--number")?.unwrap_or(5),
-        opt_number: args.value_from_str("--opt-number")?,
-        width: args.value_from_fn("--width", parse_width)?.unwrap_or(10),
-        input: args.value_from_os_str("--input", parse_path)?,
+        // Parses a required value that implements `FromStr`.
+        // Returns an error if not present.
+        number: args.value_from_str("--number")?,
+        // Parses an optional value that implements `FromStr`.
+        opt_number: args.opt_value_from_str("--opt-number")?,
+        // Parses an optional value from `&str` using a specified function.
+        width: args.opt_value_from_fn("--width", parse_width)?.unwrap_or(10),
+        // Parses an optional value from `&OsStr` using a specified function.
+        input: args.opt_value_from_os_str("--input", parse_path)?,
+        // Will return all free arguments or an error if any flags are left.
         free: args.free()?,
     };
 

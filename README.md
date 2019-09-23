@@ -37,12 +37,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         help: args.contains(["-h", "--help"]),
         // or just a string for a single one.
         version: args.contains("-V"),
-        // Parses a value that implements `FromStr`.
-        number: args.value_from_str("--number")?.unwrap_or(5),
         // Parses an optional value that implements `FromStr`.
-        opt_number: args.value_from_str("--opt-number")?,
-        // Parses a value using a specified function.
-        width: args.value_from_fn("--width", parse_width)?.unwrap_or(10),
+        number: args.opt_value_from_str("--number")?.unwrap_or(5),
+        // Parses an optional value that implements `FromStr`.
+        opt_number: args.opt_value_from_str("--opt-number")?,
+        // Parses an optional value using a specified function.
+        width: args.opt_value_from_fn("--width", parse_width)?.unwrap_or(10),
         // Will return all free arguments or an error if any flags are left.
         free: args.free()?,
     };
