@@ -1,7 +1,7 @@
 /*!
 An ultra simple CLI arguments parser.
 
-- Only flags, options and free arguments are supported.
+- Only flags, options, free arguments and subcommands are supported.
 - Arguments can be separated by a space or `=`.
 - Non UTF-8 arguments are supported.
 - No help generation.
@@ -150,6 +150,24 @@ impl Arguments {
         let mut args: Vec<_> = std::env::args_os().collect();
         args.remove(0);
         Arguments(args)
+    }
+
+    /// Returns the name of the subcommand, that is, the first positional argument.
+    pub fn subcommand(&mut self) -> Result<Option<String>, Error> {
+        if self.0.is_empty() {
+            return Ok(None);
+        }
+
+        if let Some(s) = self.0[0].to_str() {
+            if s.starts_with('-') {
+                return Ok(None);
+            }
+        }
+
+        self.0.remove(0)
+            .into_string()
+            .map_err(|_| Error::NonUtf8Argument)
+            .map(Some)
     }
 
     /// Checks that arguments contain a specified flag.

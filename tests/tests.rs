@@ -345,3 +345,17 @@ fn missing_required_option_03() {
     assert_eq!(value.unwrap_err().to_string(),
                "the '-w/--width' option must be set");
 }
+
+#[test]
+fn subcommand() {
+    let mut args = Arguments::from_vec(to_vec(&["toolchain", "install", "--help"]));
+
+    let cmd = args.subcommand().unwrap();
+    assert_eq!(cmd, Some("toolchain".to_string()));
+
+    let cmd = args.subcommand().unwrap();
+    assert_eq!(cmd, Some("install".to_string()));
+
+    let cmd = args.subcommand().unwrap();
+    assert_eq!(cmd, None);
+}
