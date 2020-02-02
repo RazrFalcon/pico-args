@@ -1,5 +1,5 @@
 [package]
-name = "gumdrop-app"
+name = "argh-app"
 version = "0.1.0"
 authors = ["Evgeniy Reizner <razrfalcon@gmail.com>"]
 edition = "2018"
@@ -9,4 +9,4 @@ name = "app"
 path = "app.rs"
 
 [dependencies]
-gumdrop = "0.7"
+argh = "0.1"

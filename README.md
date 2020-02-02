@@ -6,7 +6,7 @@
 
 An ultra simple CLI arguments parser.
 
-- Only flags, options and free arguments are supported.
+- Only flags, options, free arguments and subcommands are supported.
 - Arguments can be separated by a space or `=`.
 - Non UTF-8 arguments are supported.
 - No help generation.
@@ -64,11 +64,11 @@ There are a lot of arguments parsing implementations, but we will use only these
 - [gumdrop](https://crates.io/crates/gumdrop) - a simple parser that uses procedural macros
 - [structopt](https://crates.io/crates/structopt) - a two above combined
 
-|                   | `pico-args` | `clap`   | `gumdrop` | `structopt` |
-|-------------------|-------------|----------|-----------|-------------|
-| Binary overhead   | 20.0KiB     | 435.1KiB | 23.0KiB   | 436.8KiB    |
-| Build time        | 1s          | 15s      | 31s       | 27s         |
-| Tested version    | 0.3.0       | 2.33.0   | 0.6.0     | 0.2.18      |
+|                   | null    | `pico-args` | `clap`   | `gumdrop` | `structopt` | `argh`      |
+|-------------------|---------|-------------|----------|-----------|-------------|-------------|
+| Binary overhead   | 0KiB    | 18.8KiB     | 390.6KiB | 22.0KiB   | 390.8KiB    | **18.1KiB** |
+| Build time        | 0.1s    | **0.5s**    | 5.5s     | 9s        | 17.5s       | 6.4s        |
+| Tested version    | -       | 0.3.1       | 2.33.0   | 0.7.0     | 0.3.9       | 0.1.3       |
 
 - Binary size overhead was measured by subtracting the `.text` section size of an app with
   arguments parsing and a hello world app.
