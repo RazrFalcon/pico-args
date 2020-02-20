@@ -49,6 +49,7 @@ fn invalid_flag_01() {
     assert!(args.contains("v"));
 }
 
+#[cfg(debug_assertions)]
 #[test]
 #[should_panic]
 fn invalid_flag_02() {
@@ -56,6 +57,7 @@ fn invalid_flag_02() {
     assert!(args.contains(["v", "--version"]));
 }
 
+#[cfg(debug_assertions)]
 #[test]
 #[should_panic]
 fn invalid_flag_03() {
@@ -63,6 +65,7 @@ fn invalid_flag_03() {
     assert!(args.contains(["-v", "-version"]));
 }
 
+#[cfg(debug_assertions)]
 #[test]
 #[should_panic]
 fn invalid_flag_04() {
