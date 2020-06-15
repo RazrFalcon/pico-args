@@ -1,3 +1,6 @@
 language: rust
 rust:
   - stable
+script:
+  - cargo test # with eq-separator feature
+  - cargo test --no-default-features # no eq-separator feature

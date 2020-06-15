@@ -51,6 +51,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
+### Build features
+
+- `eq-separator`
+
+  Allows parsing arguments separated by `=`. Enabled by default.<br/>
+  This feature adds about 1KiB to the resulting binary.
+
 ### Alternatives
 
 The core idea of `pico-args` is to provide some "sugar" for arguments parsing without
@@ -63,12 +70,14 @@ There are a lot of arguments parsing implementations, but we will use only these
 - [clap](https://crates.io/crates/clap) - is the most popular and complete one
 - [gumdrop](https://crates.io/crates/gumdrop) - a simple parser that uses procedural macros
 - [structopt](https://crates.io/crates/structopt) - a two above combined
+- [argh](https://crates.io/crates/argh) - similar to gumdrop
 
-|                   | null    | `pico-args` | `clap`   | `gumdrop` | `structopt` | `argh`      |
-|-------------------|---------|-------------|----------|-----------|-------------|-------------|
-| Binary overhead   | 0KiB    | 18.8KiB     | 390.6KiB | 22.0KiB   | 390.8KiB    | **18.1KiB** |
-| Build time        | 0.1s    | **0.5s**    | 5.5s     | 9s        | 17.5s       | 6.4s        |
-| Tested version    | -       | 0.3.1       | 2.33.0   | 0.7.0     | 0.3.9       | 0.1.3       |
+|                        | null    | `pico-args` | `clap`   | `gumdrop` | `structopt` | `argh`      |
+|------------------------|---------|-------------|----------|-----------|-------------|-------------|
+| Binary overhead        | 0KiB    | 18.6KiB     | 379.8KiB | 21.9KiB   | 379.6KiB    | **17.1KiB** |
+| Build time             | 0.1s    | **0.5s**    | 5.4s     | 7.7s      | 15.3s       | 6.0s        |
+| Number of dependencies | 0       | **0**       | 12       | 5         | 25          | 12          |
+| Tested version         | -       | 0.3.1       | 2.33.1   | 0.8.0     | 0.3.14      | 0.1.3       |
 
 - Binary size overhead was measured by subtracting the `.text` section size of an app with
   arguments parsing and a hello world app.

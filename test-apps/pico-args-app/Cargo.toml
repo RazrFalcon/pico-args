@@ -9,4 +9,8 @@ name = "app"
 path = "app.rs"
 
 [dependencies]
-pico-args = { path = "../.." }
+pico-args = { path = "../..", default-features = false }
+
+[features]
+default = ["eq-separator"]
+eq-separator = ["pico-args/eq-separator"]

@@ -9,4 +9,4 @@ name = "app"
 path = "app.rs"
 
 [dependencies]
-gumdrop = "0.7"
+gumdrop = "0.8"

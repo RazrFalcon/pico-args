@@ -45,6 +45,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 ```
+
+## Build features
+
+- `eq-separator`
+
+  Allows parsing arguments separated by `=`. Enabled by default.<br/>
+  This feature adds about 1KiB to the resulting binary.
 */
 
 #![doc(html_root_url = "https://docs.rs/pico-args/0.3.1")]
@@ -126,6 +133,7 @@ impl std::error::Error for Error {}
 
 #[derive(Clone, Copy, PartialEq)]
 enum PairKind {
+    #[cfg(feature = "eq-separator")]
     SingleArgument,
     TwoArguments,
 }
@@ -275,7 +283,8 @@ impl Arguments {
         }
     }
 
-    // The whole logic should be type-independent to prevent monomorphization.
+    // The whole logic must be type-independent to prevent monomorphization.
+    #[cfg(feature = "eq-separator")]
     #[inline(never)]
     fn find_value(
         &mut self,
@@ -334,6 +343,28 @@ impl Arguments {
             }
 
             Ok(Some((value, PairKind::SingleArgument, idx)))
+        } else {
+            Ok(None)
+        }
+    }
+
+    // The whole logic must be type-independent to prevent monomorphization.
+    #[cfg(not(feature = "eq-separator"))]
+    #[inline(never)]
+    fn find_value(
+        &mut self,
+        keys: Keys,
+    ) -> Result<Option<(&str, PairKind, usize)>, Error> {
+        if let Some((idx, key)) = self.index_of(keys) {
+            // Parse a `--key value` pair.
+
+            let value = match self.0.get(idx + 1) {
+                Some(v) => v,
+                None => return Err(Error::OptionWithoutAValue(key)),
+            };
+
+            let value = os_to_str(value)?;
+            Ok(Some((value, PairKind::TwoArguments, idx)))
         } else {
             Ok(None)
         }
@@ -421,6 +452,7 @@ impl Arguments {
         None
     }
 
+    #[cfg(feature = "eq-separator")]
     #[inline(never)]
     fn index_of2(&self, keys: Keys) -> Option<(usize, &'static str)> {
         // Loop unroll to save space.
@@ -606,6 +638,7 @@ fn error_to_string<E: Display>(e: E) -> String {
     e.to_string()
 }
 
+#[cfg(feature = "eq-separator")]
 #[inline(never)]
 fn starts_with_plus_eq(text: &OsStr, prefix: &str) -> bool {
     if let Some(s) = text.to_str() {
@@ -619,6 +652,7 @@ fn starts_with_plus_eq(text: &OsStr, prefix: &str) -> bool {
     false
 }
 
+#[cfg(feature = "eq-separator")]
 #[inline]
 fn ends_with(text: &str, c: u8) -> bool {
     if text.is_empty() {
