@@ -54,7 +54,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
   This feature adds about 1KiB to the resulting binary.
 */
 
-#![doc(html_root_url = "https://docs.rs/pico-args/0.3.1")]
+#![doc(html_root_url = "https://docs.rs/pico-args/0.3.2")]
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]

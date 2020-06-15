@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.3.2] - 2020-06-15
 ### Added
 - `eq-separator` build feature.
 
@@ -39,7 +41,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Do not panic while parsing non UTF-8 arguments.
 
-[Unreleased]: https://github.com/RazrFalcon/pico-args/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/RazrFalcon/pico-args/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/RazrFalcon/pico-args/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/RazrFalcon/pico-args/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/RazrFalcon/pico-args/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/RazrFalcon/pico-args/compare/v0.1.0...v0.2.0

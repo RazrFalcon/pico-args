@@ -77,7 +77,7 @@ There are a lot of arguments parsing implementations, but we will use only these
 | Binary overhead        | 0KiB    | 18.6KiB     | 379.8KiB | 21.9KiB   | 379.6KiB    | **17.1KiB** |
 | Build time             | 0.1s    | **0.5s**    | 5.4s     | 7.7s      | 15.3s       | 6.0s        |
 | Number of dependencies | 0       | **0**       | 12       | 5         | 25          | 12          |
-| Tested version         | -       | 0.3.1       | 2.33.1   | 0.8.0     | 0.3.14      | 0.1.3       |
+| Tested version         | -       | 0.3.2       | 2.33.1   | 0.8.0     | 0.3.14      | 0.1.3       |
 
 - Binary size overhead was measured by subtracting the `.text` section size of an app with
   arguments parsing and a hello world app.
