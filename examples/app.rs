@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use std::ffi::OsStr;
+use std::path::PathBuf;
 
 use pico_args::Arguments;
 
@@ -38,7 +38,9 @@ fn submain() -> Result<(), pico_args::Error> {
         // Parses an optional value that implements `FromStr`.
         opt_number: args.opt_value_from_str("--opt-number")?,
         // Parses an optional value from `&str` using a specified function.
-        width: args.opt_value_from_fn("--width", parse_width)?.unwrap_or(10),
+        width: args
+            .opt_value_from_fn("--width", parse_width)?
+            .unwrap_or(10),
         // Parses an optional value from `&OsStr` using a specified function.
         input: args.opt_value_from_os_str("--input", parse_path)?,
         // Will return all free arguments or an error if any flags are left.

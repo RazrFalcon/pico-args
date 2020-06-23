@@ -55,14 +55,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 */
 
 #![doc(html_root_url = "https://docs.rs/pico-args/0.3.2")]
-
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-use std::ffi::{OsString, OsStr};
+use std::ffi::{OsStr, OsString};
 use std::fmt::{self, Display};
 use std::str::FromStr;
-
 
 /// A list of possible errors.
 #[derive(Clone, Debug)]
@@ -91,14 +89,17 @@ pub enum Error {
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Error::NonUtf8Argument => {
-                write!(f, "argument is not a UTF-8 string")
-            }
+            Error::NonUtf8Argument => write!(f, "argument is not a UTF-8 string"),
             Error::MissingOption(key) => {
                 if key.second().is_empty() {
                     write!(f, "the '{}' option must be set", key.first())
                 } else {
-                    write!(f, "the '{}/{}' option must be set", key.first(), key.second())
+                    write!(
+                        f,
+                        "the '{}/{}' option must be set",
+                        key.first(),
+                        key.second()
+                    )
                 }
             }
             Error::OptionWithoutAValue(key) => {
@@ -130,14 +131,12 @@ impl Display for Error {
 
 impl std::error::Error for Error {}
 
-
 #[derive(Clone, Copy, PartialEq)]
 enum PairKind {
     #[cfg(feature = "eq-separator")]
     SingleArgument,
     TwoArguments,
 }
-
 
 /// An arguments parser.
 #[derive(Clone, Debug)]
@@ -172,7 +171,8 @@ impl Arguments {
             }
         }
 
-        self.0.remove(0)
+        self.0
+            .remove(0)
             .into_string()
             .map_err(|_| Error::NonUtf8Argument)
             .map(Some)
@@ -239,10 +239,10 @@ impl Arguments {
     ///
     /// This is a shorthand for `opt_value_from_fn("--key", FromStr::from_str)`
     pub fn opt_value_from_str<A, T>(&mut self, keys: A) -> Result<Option<T>, Error>
-        where
-            A: Into<Keys>,
-            T: FromStr,
-            <T as FromStr>::Err: Display,
+    where
+        A: Into<Keys>,
+        T: FromStr,
+        <T as FromStr>::Err: Display,
     {
         self.opt_value_from_fn(keys, FromStr::from_str)
     }
@@ -276,12 +276,10 @@ impl Arguments {
 
                         Ok(Some(value))
                     }
-                    Err(e) => {
-                        Err(Error::Utf8ArgumentParsingFailed {
-                            value: value.to_string(),
-                            cause: error_to_string(e),
-                        })
-                    }
+                    Err(e) => Err(Error::Utf8ArgumentParsingFailed {
+                        value: value.to_string(),
+                        cause: error_to_string(e),
+                    }),
                 }
             }
             None => Ok(None),
@@ -291,10 +289,7 @@ impl Arguments {
     // The whole logic must be type-independent to prevent monomorphization.
     #[cfg(feature = "eq-separator")]
     #[inline(never)]
-    fn find_value(
-        &mut self,
-        keys: Keys,
-    ) -> Result<Option<(&str, PairKind, usize)>, Error> {
+    fn find_value(&mut self, keys: Keys) -> Result<Option<(&str, PairKind, usize)>, Error> {
         if let Some((idx, key)) = self.index_of(keys) {
             // Parse a `--key value` pair.
 
@@ -356,10 +351,7 @@ impl Arguments {
     // The whole logic must be type-independent to prevent monomorphization.
     #[cfg(not(feature = "eq-separator"))]
     #[inline(never)]
-    fn find_value(
-        &mut self,
-        keys: Keys,
-    ) -> Result<Option<(&str, PairKind, usize)>, Error> {
+    fn find_value(&mut self, keys: Keys) -> Result<Option<(&str, PairKind, usize)>, Error> {
         if let Some((idx, key)) = self.index_of(keys) {
             // Parse a `--key value` pair.
 
@@ -432,9 +424,9 @@ impl Arguments {
                     self.0.remove(idx);
                     Ok(Some(value))
                 }
-                Err(e) => {
-                    Err(Error::ArgumentParsingFailed { cause: error_to_string(e) })
-                }
+                Err(e) => Err(Error::ArgumentParsingFailed {
+                    cause: error_to_string(e),
+                }),
             }
         } else {
             Ok(None)
@@ -463,13 +455,21 @@ impl Arguments {
         // Loop unroll to save space.
 
         if !keys.first().is_empty() {
-            if let Some(i) = self.0.iter().position(|v| starts_with_plus_eq(v, keys.first())) {
+            if let Some(i) = self
+                .0
+                .iter()
+                .position(|v| starts_with_plus_eq(v, keys.first()))
+            {
                 return Some((i, keys.first()));
             }
         }
 
         if !keys.second().is_empty() {
-            if let Some(i) = self.0.iter().position(|v| starts_with_plus_eq(v, keys.second())) {
+            if let Some(i) = self
+                .0
+                .iter()
+                .position(|v| starts_with_plus_eq(v, keys.second()))
+            {
                 return Some((i, keys.second()));
             }
         }
@@ -548,7 +548,9 @@ impl Arguments {
 
             match f(value.as_os_str()) {
                 Ok(value) => Ok(Some(value)),
-                Err(e) => Err(Error::ArgumentParsingFailed { cause: error_to_string(e) }),
+                Err(e) => Err(Error::ArgumentParsingFailed {
+                    cause: error_to_string(e),
+                }),
             }
         }
     }
@@ -578,7 +580,11 @@ impl Arguments {
             os_to_str(arg.as_os_str())?;
         }
 
-        let args = self.0.iter().map(|a| a.to_str().unwrap().to_string()).collect();
+        let args = self
+            .0
+            .iter()
+            .map(|a| a.to_str().unwrap().to_string())
+            .collect();
         Ok(args)
     }
 
@@ -672,7 +678,6 @@ fn os_to_str(text: &OsStr) -> Result<&str, Error> {
     text.to_str().ok_or_else(|| Error::NonUtf8Argument)
 }
 
-
 /// A keys container.
 ///
 /// Should not be used directly.
@@ -696,7 +701,10 @@ impl From<[&'static str; 2]> for Keys {
     #[inline]
     fn from(v: [&'static str; 2]) -> Self {
         debug_assert!(v[0].starts_with("-"), "an argument should start with '-'");
-        debug_assert!(!v[0].starts_with("--"), "the first argument should be short");
+        debug_assert!(
+            !v[0].starts_with("--"),
+            "the first argument should be short"
+        );
         debug_assert!(v[1].starts_with("--"), "the second argument should be long");
 
         Keys(v)
