@@ -284,7 +284,6 @@ impl Arguments {
     }
 
     // The whole logic must be type-independent to prevent monomorphization.
-    #[cfg(feature = "eq-separator")]
     #[inline(never)]
     fn find_value(
         &mut self,
@@ -299,8 +298,10 @@ impl Arguments {
             };
 
             let value = os_to_str(value)?;
-            Ok(Some((value, PairKind::TwoArguments, idx)))
-        } else if let Some((idx, key)) = self.index_of2(keys) {
+            return Ok(Some((value, PairKind::TwoArguments, idx)));
+        }
+        #[cfg(feature = "eq-separator")]
+        if let Some((idx, key)) = self.index_of2(keys) {
             // Parse a `--key=value` pair.
 
             let value = &self.0[idx];
@@ -342,32 +343,9 @@ impl Arguments {
                 return Err(Error::OptionWithoutAValue(key));
             }
 
-            Ok(Some((value, PairKind::SingleArgument, idx)))
-        } else {
-            Ok(None)
+            return Ok(Some((value, PairKind::SingleArgument, idx)));
         }
-    }
-
-    // The whole logic must be type-independent to prevent monomorphization.
-    #[cfg(not(feature = "eq-separator"))]
-    #[inline(never)]
-    fn find_value(
-        &mut self,
-        keys: Keys,
-    ) -> Result<Option<(&str, PairKind, usize)>, Error> {
-        if let Some((idx, key)) = self.index_of(keys) {
-            // Parse a `--key value` pair.
-
-            let value = match self.0.get(idx + 1) {
-                Some(v) => v,
-                None => return Err(Error::OptionWithoutAValue(key)),
-            };
-
-            let value = os_to_str(value)?;
-            Ok(Some((value, PairKind::TwoArguments, idx)))
-        } else {
-            Ok(None)
-        }
+        Ok(None)
     }
 
     /// Parses a key-value pair using a specified function.
