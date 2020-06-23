@@ -209,6 +209,11 @@ impl Arguments {
 
     /// Parses a key-value pair using a specified function.
     ///
+    /// When a key-value pair is separated by a space, the algorithm
+    /// will threat the next argument after the key as a value,
+    /// even if it has a `-/--` prefix.
+    /// So a key-value pair like `--key --value` is not an error.
+    ///
     /// Must be used only once for each option.
     ///
     /// # Errors
