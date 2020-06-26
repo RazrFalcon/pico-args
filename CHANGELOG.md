@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- `values_from_str`, `values_from_fn` and `values_from_os_str`.<br>
+  This functions can be used to parse arguments like:<br>
+  `--file /path1 --file /path2 --file /path3`<br>
+  But not `--file /path1 /path2 /path3`.
 
 ## [0.3.2] - 2020-06-15
 ### Added

@@ -246,6 +246,29 @@ fn missing_option_value_03() {
 }
 
 #[test]
+fn multiple_options_01() {
+    let mut args = Arguments::from_vec(to_vec(&["-w", "10", "-w", "20"]));
+    let value: Vec<u32> = args.values_from_str("-w").unwrap();
+    assert_eq!(value, &[10, 20]);
+}
+
+#[test]
+fn multiple_options_02() {
+    // No values is not an error.
+    let mut args = Arguments::from_vec(to_vec(&[]));
+    let value: Vec<u32> = args.values_from_str("-w").unwrap();
+    assert_eq!(value, &[]);
+}
+
+#[test]
+fn multiple_options_03() {
+    // Argument can be split.
+    let mut args = Arguments::from_vec(to_vec(&["-w", "10", "--other", "-w", "20"]));
+    let value: Vec<u32> = args.values_from_str("-w").unwrap();
+    assert_eq!(value, &[10, 20]);
+}
+
+#[test]
 fn free_01() {
     let args = Arguments::from_vec(to_vec(&[]));
     assert_eq!(args.free_os().unwrap(), to_vec(&[]));

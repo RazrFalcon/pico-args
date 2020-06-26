@@ -239,10 +239,10 @@ impl Arguments {
     ///
     /// This is a shorthand for `opt_value_from_fn("--key", FromStr::from_str)`
     pub fn opt_value_from_str<A, T>(&mut self, keys: A) -> Result<Option<T>, Error>
-        where
-            A: Into<Keys>,
-            T: FromStr,
-            <T as FromStr>::Err: Display,
+    where
+        A: Into<Keys>,
+        T: FromStr,
+        <T as FromStr>::Err: Display,
     {
         self.opt_value_from_fn(keys, FromStr::from_str)
     }
@@ -375,6 +375,48 @@ impl Arguments {
         }
     }
 
+    /// Parses multiple key-value pairs into the `Vec` using `FromStr` trait.
+    ///
+    /// This is a shorthand for `values_from_fn("--key", FromStr::from_str)`
+    pub fn values_from_str<A, T>(&mut self, keys: A) -> Result<Vec<T>, Error>
+        where
+            A: Into<Keys>,
+            T: FromStr,
+            <T as FromStr>::Err: Display,
+    {
+        self.values_from_fn(keys, FromStr::from_str)
+    }
+
+    /// Parses multiple key-value pairs into the `Vec` using a specified function.
+    ///
+    /// This functions can be used to parse arguments like:<br>
+    /// `--file /path1 --file /path2 --file /path3`<br>
+    /// But not `--file /path1 /path2 /path3`.
+    ///
+    /// Arguments ca also be separated: `--file /path1 --some-flag --file /path2`
+    ///
+    /// This method simply executes `opt_value_from_fn` multiple times.
+    ///
+    /// An empty `Vec` is not an error.
+    pub fn values_from_fn<A: Into<Keys>, T, E: Display>(
+        &mut self,
+        keys: A,
+        f: fn(&str) -> Result<T, E>,
+    ) -> Result<Vec<T>, Error> {
+        let keys = keys.into();
+
+        let mut values = Vec::new();
+        loop {
+            match self.opt_value_from_fn(keys, f) {
+                Ok(Some(v)) => values.push(v),
+                Ok(None) => break,
+                Err(e) => return Err(e),
+            }
+        }
+
+        Ok(values)
+    }
+
     /// Parses a key-value pair using a specified function.
     ///
     /// Unlike `value_from_fn`, parses `&OsStr` and not `&str`.
@@ -439,6 +481,31 @@ impl Arguments {
         } else {
             Ok(None)
         }
+    }
+
+    /// Parses multiple key-value pairs into the `Vec` using a specified function.
+    ///
+    /// This method simply executes `opt_value_from_os_str` multiple times.
+    ///
+    /// Unlike `values_from_fn`, parses `&OsStr` and not `&str`.
+    ///
+    /// An empty `Vec` is not an error.
+    pub fn values_from_os_str<A: Into<Keys>, T, E: Display>(
+        &mut self,
+        keys: A,
+        f: fn(&OsStr) -> Result<T, E>,
+    ) -> Result<Vec<T>, Error> {
+        let keys = keys.into();
+        let mut values = Vec::new();
+        loop {
+            match self.opt_value_from_os_str(keys, f) {
+                Ok(Some(v)) => values.push(v),
+                Ok(None) => break,
+                Err(e) => return Err(e),
+            }
+        }
+
+        Ok(values)
     }
 
     #[inline(never)]
