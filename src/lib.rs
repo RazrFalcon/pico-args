@@ -151,9 +151,11 @@ impl Arguments {
         Arguments(args)
     }
 
-    /// Creates a parser from `env::args()`.
+    /// Creates a parser from [`env::args`].
     ///
     /// The executable path will be removed.
+    ///
+    /// [`env::args`]: https://doc.rust-lang.org/stable/std/env/fn.args.html
     pub fn from_env() -> Self {
         let mut args: Vec<_> = std::env::args_os().collect();
         args.remove(0);
@@ -219,9 +221,11 @@ impl Arguments {
     /// # Errors
     ///
     /// - When option is not present.
-    /// - When key or value is not a UTF-8 string. Use `value_from_os_str` instead.
+    /// - When key or value is not a UTF-8 string. Use [`value_from_os_str`] instead.
     /// - When value parsing failed.
     /// - When key-value pair is separated not by space or `=`.
+    ///
+    /// [`value_from_os_str`]: struct.Arguments.html#method.value_from_os_str
     pub fn value_from_fn<A: Into<Keys>, T, E: Display>(
         &mut self,
         keys: A,
@@ -249,7 +253,9 @@ impl Arguments {
 
     /// Parses an optional key-value pair using a specified function.
     ///
-    /// The same as `value_from_fn`, but returns `Ok(None)` when option is not present.
+    /// The same as [`value_from_fn`], but returns `Ok(None)` when option is not present.
+    ///
+    /// [`value_from_fn`]: struct.Arguments.html#method.value_from_fn
     pub fn opt_value_from_fn<A: Into<Keys>, T, E: Display>(
         &mut self,
         keys: A,
@@ -393,11 +399,13 @@ impl Arguments {
     /// `--file /path1 --file /path2 --file /path3`<br>
     /// But not `--file /path1 /path2 /path3`.
     ///
-    /// Arguments ca also be separated: `--file /path1 --some-flag --file /path2`
+    /// Arguments can also be separated: `--file /path1 --some-flag --file /path2`
     ///
-    /// This method simply executes `opt_value_from_fn` multiple times.
+    /// This method simply executes [`opt_value_from_fn`] multiple times.
     ///
     /// An empty `Vec` is not an error.
+    ///
+    /// [`opt_value_from_fn`]: struct.Arguments.html#method.opt_value_from_fn
     pub fn values_from_fn<A: Into<Keys>, T, E: Display>(
         &mut self,
         keys: A,
@@ -419,7 +427,7 @@ impl Arguments {
 
     /// Parses a key-value pair using a specified function.
     ///
-    /// Unlike `value_from_fn`, parses `&OsStr` and not `&str`.
+    /// Unlike [`value_from_fn`], parses `&OsStr` and not `&str`.
     ///
     /// Must be used only once for each option.
     ///
@@ -428,7 +436,9 @@ impl Arguments {
     /// - When option is not present.
     /// - When value parsing failed.
     /// - When key-value pair is separated not by space.
-    ///   Only `value_from_fn` supports `=` separator.
+    ///   Only [`value_from_fn`] supports `=` separator.
+    ///
+    /// [`value_from_fn`]: struct.Arguments.html#method.value_from_fn
     pub fn value_from_os_str<A: Into<Keys>, T, E: Display>(
         &mut self,
         keys: A,
@@ -445,6 +455,8 @@ impl Arguments {
     /// Parses an optional key-value pair using a specified function.
     ///
     /// The same as `value_from_os_str`, but returns `Ok(None)` when option is not present.
+    ///
+    /// [`value_from_os_str`]: struct.Arguments.html#method.value_from_os_str
     pub fn opt_value_from_os_str<A: Into<Keys>, T, E: Display>(
         &mut self,
         keys: A,
@@ -485,11 +497,14 @@ impl Arguments {
 
     /// Parses multiple key-value pairs into the `Vec` using a specified function.
     ///
-    /// This method simply executes `opt_value_from_os_str` multiple times.
+    /// This method simply executes [`opt_value_from_os_str`] multiple times.
     ///
-    /// Unlike `values_from_fn`, parses `&OsStr` and not `&str`.
+    /// Unlike [`values_from_fn`], parses `&OsStr` and not `&str`.
     ///
     /// An empty `Vec` is not an error.
+    ///
+    /// [`opt_value_from_os_str`]: struct.Arguments.html#method.opt_value_from_os_str
+    /// [`values_from_fn`]: struct.Arguments.html#method.values_from_fn
     pub fn values_from_os_str<A: Into<Keys>, T, E: Display>(
         &mut self,
         keys: A,
@@ -562,8 +577,10 @@ impl Arguments {
     /// # Errors
     ///
     /// - When any flags are left.
-    /// - When argument is not a UTF-8 string. Use `free_from_os_str` instead.
+    /// - When argument is not a UTF-8 string. Use [`free_from_os_str`] instead.
     /// - When value parsing failed.
+    ///
+    /// [`value_from_os_str`]: struct.Arguments.html#method.value_from_os_str
     #[inline(never)]
     pub fn free_from_fn<T, E: Display>(
         &mut self,
@@ -684,7 +701,9 @@ impl Arguments {
 
     /// Checks that all flags were processed.
     ///
-    /// Use it instead of `free()` if you do not expect any free arguments.
+    /// Use it instead of [`free`] if you do not expect any free arguments.
+    ///
+    /// [`free`]: struct.Arguments.html#method.free
     pub fn finish(self) -> Result<(), Error> {
         if !self.0.is_empty() {
             let mut args = Vec::new();
