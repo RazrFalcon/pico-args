@@ -322,7 +322,11 @@ impl Arguments {
             let mut value_range = key.len()..value.len();
 
             #[cfg(feature = "eq-separator")]
-            if value.as_bytes().get(value_range.start) == Some(&b'=') {
+            let remove_eq = value.as_bytes().get(value_range.start) == Some(&b'=');
+            #[cfg(not(feature = "eq-separator"))]
+            let remove_eq = false;
+
+            if remove_eq {
                 value_range.start += 1;
             } else {
                 // Key must be followed by `=` if not `short-space-opt`
