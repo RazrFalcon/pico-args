@@ -133,7 +133,7 @@ impl std::error::Error for Error {}
 
 #[derive(Clone, Copy, PartialEq)]
 enum PairKind {
-    #[cfg(feature = "eq-separator")]
+    #[cfg(any(feature = "eq-separator", feature = "short-space-opt"))]
     SingleArgument,
     TwoArguments,
 }
@@ -295,7 +295,7 @@ impl Arguments {
     }
 
     // The whole logic must be type-independent to prevent monomorphization.
-    #[cfg(feature = "eq-separator")]
+    #[cfg(any(feature = "eq-separator", feature = "short-space-opt"))]
     #[inline(never)]
     fn find_value(
         &mut self,
@@ -312,7 +312,7 @@ impl Arguments {
             let value = os_to_str(value)?;
             Ok(Some((value, PairKind::TwoArguments, idx)))
         } else if let Some((idx, key)) = self.index_of2(keys) {
-            // Parse a `--key=value` pair.
+            // Parse a `--key=value` or `-Kvalue` pair.
 
             let value = &self.0[idx];
 
@@ -320,10 +320,13 @@ impl Arguments {
             let value = value.to_str().ok_or_else(|| Error::NonUtf8Argument)?;
 
             let mut value_range = key.len()..value.len();
+
+            #[cfg(feature = "eq-separator")]
             if value.as_bytes().get(value_range.start) == Some(&b'=') {
                 value_range.start += 1;
             } else {
-                // Key must be followed by `=`.
+                // Key must be followed by `=` if not `short-space-opt`
+                #[cfg(not(feature = "short-space-opt"))]
                 return Err(Error::OptionWithoutAValue(key));
             }
 
@@ -360,7 +363,7 @@ impl Arguments {
     }
 
     // The whole logic must be type-independent to prevent monomorphization.
-    #[cfg(not(feature = "eq-separator"))]
+    #[cfg(not(any(feature = "eq-separator", feature = "short-space-opt")))]
     #[inline(never)]
     fn find_value(
         &mut self,
@@ -539,19 +542,19 @@ impl Arguments {
         None
     }
 
-    #[cfg(feature = "eq-separator")]
+    #[cfg(any(feature = "eq-separator", feature = "short-space-opt"))]
     #[inline(never)]
     fn index_of2(&self, keys: Keys) -> Option<(usize, &'static str)> {
         // Loop unroll to save space.
 
         if !keys.first().is_empty() {
-            if let Some(i) = self.0.iter().position(|v| starts_with_plus_eq(v, keys.first())) {
+            if let Some(i) = self.0.iter().position(|v| index_predicate(v, keys.first())) {
                 return Some((i, keys.first()));
             }
         }
 
         if !keys.second().is_empty() {
-            if let Some(i) = self.0.iter().position(|v| starts_with_plus_eq(v, keys.second())) {
+            if let Some(i) = self.0.iter().position(|v| index_predicate(v, keys.second())) {
                 return Some((i, keys.second()));
             }
         }
@@ -743,7 +746,35 @@ fn starts_with_plus_eq(text: &OsStr, prefix: &str) -> bool {
     false
 }
 
-#[cfg(feature = "eq-separator")]
+#[cfg(feature = "short-space-opt")]
+#[inline(never)]
+fn starts_with_short_prefix(text: &OsStr, prefix: &str) -> bool {
+    if prefix.starts_with("--") {
+        return false; // Only works for short keys
+    }
+    if let Some(s) = text.to_str() {
+        if s.get(0..prefix.len()) == Some(prefix) {
+            return true;
+        }
+    }
+
+    false
+}
+
+#[cfg(all(feature = "eq-separator", feature = "short-space-opt"))]
+fn index_predicate(text: &OsStr, prefix: &str) -> bool {
+    starts_with_plus_eq(text, prefix) || starts_with_short_prefix(text, prefix)
+}
+#[cfg(all(feature = "eq-separator", not(feature = "short-space-opt")))]
+fn index_predicate(text: &OsStr, prefix: &str) -> bool {
+    starts_with_plus_eq(text, prefix)
+}
+#[cfg(all(feature = "short-space-opt", not(feature = "eq-separator")))]
+fn index_predicate(text: &OsStr, prefix: &str) -> bool {
+    starts_with_short_prefix(text, prefix)
+}
+
+#[cfg(any(feature = "eq-separator", feature = "short-space-opt"))]
 #[inline]
 fn ends_with(text: &str, c: u8) -> bool {
     if text.is_empty() {
