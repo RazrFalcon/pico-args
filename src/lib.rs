@@ -86,6 +86,9 @@ pub enum Error {
 
     /// Unused arguments left.
     UnusedArgsLeft(Vec<String>),
+
+    /// Attempting to use '=' when `short-space-opt` but not `eq-separator` enabled
+    EqSepDisabled,
 }
 
 impl Display for Error {
@@ -123,6 +126,9 @@ impl Display for Error {
                 }
 
                 Ok(())
+            }
+            Error::EqSepDisabled => {
+                write!(f, "the '=' separator is disabled")
             }
         }
     }
@@ -321,15 +327,17 @@ impl Arguments {
 
             let mut value_range = key.len()..value.len();
 
-            #[cfg(feature = "eq-separator")]
-            {
-                if value.as_bytes().get(value_range.start) == Some(&b'=') {
+            if value.as_bytes().get(value_range.start) == Some(&b'=') {
+                #[cfg(feature = "eq-separator")]
+                {
                     value_range.start += 1;
-                } else {
-                    // Key must be followed by `=` if not `short-space-opt`
-                    #[cfg(not(feature = "short-space-opt"))]
-                    return Err(Error::OptionWithoutAValue(key));
                 }
+                #[cfg(not(feature = "eq-separator"))]
+                return Err(Error::EqSepDisabled);
+            } else {
+                // Key must be followed by `=` if not `short-space-opt`
+                #[cfg(not(feature = "short-space-opt"))]
+                return Err(Error::OptionWithoutAValue(key));
             }
 
             // Check for quoted value.
