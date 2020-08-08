@@ -62,7 +62,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
   Makes the space between short keys and their values optional (e.g. `-w10`).<br/>
   If `eq-separator` is enabled, then it takes precedence and the '=' is not included.<br/>
-  This is only applicable for short keys because `--keyvalue` would be ambiguous.
+  If `eq-separator` is disabled, then `-K=value` gives an error instead of returning `"=value"`.<br/>
+  The optional space is only applicable for short keys because `--keyvalue` would be ambiguous.
 
 ### Alternatives
 

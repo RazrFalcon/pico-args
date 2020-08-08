@@ -234,7 +234,8 @@ fn space_option_04() {
 fn space_not_eq_option_err_01() {
     let mut args = Arguments::from_vec(to_vec(&["-w=10"]));
     let value: Result<Option<String>, Error> = args.opt_value_from_str("-w");
-    assert_eq!(value.unwrap_err().to_string(), "the '=' separator is disabled");
+    assert_eq!(value.unwrap_err().to_string(),
+               "the \'-w\' option doesn\'t have an associated value");
 }
 
 #[cfg(all(feature = "short-space-opt", not(feature = "eq-separator")))]
