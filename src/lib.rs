@@ -322,16 +322,14 @@ impl Arguments {
             let mut value_range = key.len()..value.len();
 
             #[cfg(feature = "eq-separator")]
-            let remove_eq = value.as_bytes().get(value_range.start) == Some(&b'=');
-            #[cfg(not(feature = "eq-separator"))]
-            let remove_eq = false;
-
-            if remove_eq {
-                value_range.start += 1;
-            } else {
-                // Key must be followed by `=` if not `short-space-opt`
-                #[cfg(not(feature = "short-space-opt"))]
-                return Err(Error::OptionWithoutAValue(key));
+            {
+                if value.as_bytes().get(value_range.start) == Some(&b'=') {
+                    value_range.start += 1;
+                } else {
+                    // Key must be followed by `=` if not `short-space-opt`
+                    #[cfg(not(feature = "short-space-opt"))]
+                    return Err(Error::OptionWithoutAValue(key));
+                }
             }
 
             // Check for quoted value.
@@ -766,14 +764,17 @@ fn starts_with_short_prefix(text: &OsStr, prefix: &str) -> bool {
 }
 
 #[cfg(all(feature = "eq-separator", feature = "short-space-opt"))]
+#[inline]
 fn index_predicate(text: &OsStr, prefix: &str) -> bool {
     starts_with_plus_eq(text, prefix) || starts_with_short_prefix(text, prefix)
 }
 #[cfg(all(feature = "eq-separator", not(feature = "short-space-opt")))]
+#[inline]
 fn index_predicate(text: &OsStr, prefix: &str) -> bool {
     starts_with_plus_eq(text, prefix)
 }
 #[cfg(all(feature = "short-space-opt", not(feature = "eq-separator")))]
+#[inline]
 fn index_predicate(text: &OsStr, prefix: &str) -> bool {
     starts_with_short_prefix(text, prefix)
 }

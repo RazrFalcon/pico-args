@@ -213,6 +213,22 @@ fn space_option_02() {
     assert_eq!(value.unwrap(), "--width");
 }
 
+#[cfg(feature = "short-space-opt")]
+#[test]
+fn space_option_03() {
+    let mut args = Arguments::from_vec(to_vec(&["-w'10'"]));
+    let value: Option<u32> = args.opt_value_from_str(["-w", "--width"]).unwrap();
+    assert_eq!(value.unwrap(), 10);
+}
+
+#[cfg(feature = "short-space-opt")]
+#[test]
+fn space_option_04() {
+    let mut args = Arguments::from_vec(to_vec(&["-w\"10\""]));
+    let value: Option<u32> = args.opt_value_from_str(["-w", "--width"]).unwrap();
+    assert_eq!(value.unwrap(), 10);
+}
+
 #[cfg(all(feature = "short-space-opt", not(feature = "eq-separator")))]
 #[test]
 fn space_not_eq_option_01() {
@@ -229,12 +245,28 @@ fn space_eq_option_01() {
     assert_eq!(value.unwrap(), "10");
 }
 
+#[cfg(all(feature = "short-space-opt", feature = "eq-separator"))]
+#[test]
+fn space_eq_option_02() {
+    let mut args = Arguments::from_vec(to_vec(&["-w'=10'"]));
+    let value: Option<String> = args.opt_value_from_str("-w").unwrap();
+    assert_eq!(value.unwrap(), "=10");
+}
+
 #[cfg(feature = "short-space-opt")]
 #[test]
 fn space_option_err_01() {
     let mut args = Arguments::from_vec(to_vec(&["--width10"]));
     let value: Option<String> = args.opt_value_from_str("--width").unwrap();
     assert_eq!(value, None);
+}
+
+#[cfg(feature = "short-space-opt")]
+#[test]
+fn space_option_err_02() {
+    let mut args = Arguments::from_vec(to_vec(&["-w'10"]));
+    let value: Result<Option<u32>, Error> = args.opt_value_from_str("-w");
+    assert_eq!(value.unwrap_err().to_string(), "the \'-w\' option doesn\'t have an associated value");
 }
 
 #[test]
