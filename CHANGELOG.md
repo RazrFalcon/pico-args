@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.4] - 2020-08-09
+### Added
+- `short-space-opt` build feature.
+
 ## [0.3.3] - 2020-06-26
 ### Added
 - `values_from_str`, `values_from_fn` and `values_from_os_str`.<br>
@@ -48,7 +52,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Do not panic while parsing non UTF-8 arguments.
 
-[Unreleased]: https://github.com/RazrFalcon/pico-args/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/RazrFalcon/pico-args/compare/v0.3.4...HEAD
+[0.3.4]: https://github.com/RazrFalcon/pico-args/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/RazrFalcon/pico-args/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/RazrFalcon/pico-args/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/RazrFalcon/pico-args/compare/v0.3.0...v0.3.1
