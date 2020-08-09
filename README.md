@@ -58,6 +58,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
   Allows parsing arguments separated by `=`. Enabled by default.<br/>
   This feature adds about 1KiB to the resulting binary.
 
+- `short-space-opt`
+
+  Makes the space between short keys and their values optional (e.g. `-w10`).<br/>
+  If `eq-separator` is enabled, then it takes precedence and the '=' is not included.<br/>
+  If `eq-separator` is disabled, then `-K=value` gives an error instead of returning `"=value"`.<br/>
+  The optional space is only applicable for short keys because `--keyvalue` would be ambiguous.
+
 ### Alternatives
 
 The core idea of `pico-args` is to provide some "sugar" for arguments parsing without
