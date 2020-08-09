@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.3.4] - 2020-08-09
 ### Added
-- `short-space-opt` build feature.
+- `short-space-opt` build feature. Thanks to [@hdamron17](https://github.com/hdamron17).
 
 ## [0.3.3] - 2020-06-26
 ### Added
@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.3.1] - 2020-01-08
 ### Added
-- `Arguments::subcommand`.
+- `Arguments::subcommand`. Thanks to [@matklad](https://github.com/matklad).
 
 ## [0.3.0] - 2019-09-23
 ### Added
