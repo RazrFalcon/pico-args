@@ -690,10 +690,11 @@ impl Arguments {
     fn check_for_flags(&self) -> Result<(), Error> {
         // Check that there are no flags left.
         // But allow `-` which is used to indicate stdin.
+        // Also allowed negative numbers as free args e.g -10 or -3.14.
         let mut flags_left = Vec::new();
         for arg in &self.0 {
             if let Some(s) = arg.to_str() {
-                if s.starts_with('-') && s != "-" {
+                if s.starts_with('-') && s != "-" && !s.chars().skip(1).all(|c| c.is_ascii_digit() || c == '.') {
                     flags_left.push(s.to_string());
                 }
             }

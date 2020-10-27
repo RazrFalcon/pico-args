@@ -415,6 +415,18 @@ fn free_from_fn_04() {
 }
 
 #[test]
+fn free_from_fn_05() {
+    let mut args = Arguments::from_vec(to_vec(&["-5"]));
+    assert_eq!(args.free_from_fn(i32::from_str).unwrap(), Some(-5));
+}
+
+#[test]
+fn free_from_fn_06() {
+    let mut args = Arguments::from_vec(to_vec(&["-3.14"]));
+    assert_eq!(args.free_from_fn(f32::from_str).unwrap(), Some(-3.14f32));
+}
+
+#[test]
 fn free_from_str_01() {
     let mut args = Arguments::from_vec(to_vec(&["5"]));
     let value: Result<Option<u32>, Error> = args.free_from_str();
