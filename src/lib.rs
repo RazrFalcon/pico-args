@@ -68,7 +68,7 @@ use std::str::FromStr;
 #[derive(Clone, Debug)]
 pub enum Error {
     /// Arguments must be a valid UTF-8 strings.
-    NonUtf8Argument,
+    NonUtf8Argument(OsString),
 
     /// A missing option.
     MissingOption(Keys),
@@ -91,8 +91,8 @@ pub enum Error {
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Error::NonUtf8Argument => {
-                write!(f, "argument is not a UTF-8 string")
+            Error::NonUtf8Argument(arg) => {
+                write!(f, "argument is not a UTF-8 string: {:?}", arg)
             }
             Error::MissingOption(key) => {
                 if key.second().is_empty() {
@@ -176,7 +176,7 @@ impl Arguments {
 
         self.0.remove(0)
             .into_string()
-            .map_err(|_| Error::NonUtf8Argument)
+            .map_err(|arg| Error::NonUtf8Argument(arg))
             .map(Some)
     }
 
@@ -317,7 +317,7 @@ impl Arguments {
             let value = &self.0[idx];
 
             // Only UTF-8 strings are supported in this method.
-            let value = value.to_str().ok_or_else(|| Error::NonUtf8Argument)?;
+            let value =  os_to_str(value)?;
 
             let mut value_range = key.len()..value.len();
 
@@ -794,7 +794,13 @@ fn ends_with(text: &str, c: u8) -> bool {
 
 #[inline]
 fn os_to_str(text: &OsStr) -> Result<&str, Error> {
-    text.to_str().ok_or_else(|| Error::NonUtf8Argument)
+    // check for utf8 validity
+    if let Err(arg) = text.to_os_string().into_string() {
+        Err(Error::NonUtf8Argument(arg))
+    } else {
+        // safe unwrap: we have already checked for utf8
+        Ok(text.to_str().unwrap())
+    }
 }
 
 
