@@ -38,7 +38,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // or just a string for a single one.
         version: args.contains("-V"),
         // Parses an optional value that implements `FromStr`.
-        number: args.opt_value_from_str("--number")?.unwrap_or(5),
+        number: args.opt_value_from_str(["-n", "--number"])?.unwrap_or(5),
         // Parses an optional value that implements `FromStr`.
         opt_number: args.opt_value_from_str("--opt-number")?,
         // Parses an optional value using a specified function.
