@@ -105,10 +105,10 @@ impl Display for Error {
                 write!(f, "the '{}' option doesn't have an associated value", key)
             }
             Error::Utf8ArgumentParsingFailed { value, cause } => {
-                write!(f, "failed to parse '{}' cause {}", value, cause)
+                write!(f, "failed to parse '{}': {}", value, cause)
             }
             Error::ArgumentParsingFailed { cause } => {
-                write!(f, "failed to parse a binary argument cause {}", cause)
+                write!(f, "failed to parse a binary argument: {}", cause)
             }
             Error::UnusedArgsLeft(args) => {
                 // Do not use `args.join()`, because it adds 1.2KiB.
