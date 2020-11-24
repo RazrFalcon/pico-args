@@ -587,7 +587,7 @@ impl Arguments {
     /// - When argument is not a UTF-8 string. Use [`free_from_os_str`] instead.
     /// - When value parsing failed.
     ///
-    /// [`value_from_os_str`]: struct.Arguments.html#method.value_from_os_str
+    /// [`free_from_os_str`]: struct.Arguments.html#method.free_from_os_str
     #[inline(never)]
     pub fn free_from_fn<T, E: Display>(
         &mut self,
