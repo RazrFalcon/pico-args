@@ -147,6 +147,9 @@ impl Arguments {
     /// Creates a parser from a vector of arguments.
     ///
     /// The executable path **must** be removed.
+    ///
+    /// This can be used for supporting `--` arguments to forward to another program.
+    /// See `examples/dash_dash.rs` for an example.
     pub fn from_vec(args: Vec<OsString>) -> Self {
         Arguments(args)
     }
