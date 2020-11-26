@@ -148,27 +148,8 @@ impl Arguments {
     ///
     /// The executable path **must** be removed.
     ///
-    /// # Example
-    ///
     /// This can be used for supporting `--` arguments to forward to another program.
-    /// ```
-    /// // `from_vec` takes `OsString`, not `String`.
-    /// let mut args: Vec<_> = std::env::args_os().collect();
-    /// // Make sure to remove the executable path
-    /// args.remove(0);
-    /// // Find and process `--`
-    /// let forwarded_args = if let Some(dash_dash) = args.iter().position(|arg| arg == "--") {
-    ///     // Store all arguments following ...
-    ///     let later_args = args.drain(dash_dash+1..).collect();
-    ///     // .. then remove the `--`
-    ///     args.pop();
-    ///     later_args
-    /// } else {
-    ///     Vec::new()
-    /// };
-    /// // Now pass the remaining arguments through to `pico_args`
-    /// let args = pico_args::Arguments::from_vec(args);
-    /// ```
+    /// See `examples/dash_dash.rs` for an example.
     pub fn from_vec(args: Vec<OsString>) -> Self {
         Arguments(args)
     }
