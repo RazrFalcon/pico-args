@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- Allow negative numbers in free args
+- Improve example
+
+### Fixed
+- Fix broken link in documentation
 
 ## [0.3.4] - 2020-08-09
 ### Added
