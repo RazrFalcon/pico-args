@@ -601,11 +601,7 @@ impl Arguments {
         if self.0.is_empty() {
             Ok(None)
         } else {
-            // A simple take_first() implementation.
-            let mut value = OsString::new();
-            std::mem::swap(self.0.first_mut().unwrap(), &mut value);
-            self.0.remove(0);
-
+            let value = self.0.remove(0);
             let value = os_to_str(value.as_os_str())?;
             match f(&value) {
                 Ok(value) => Ok(Some(value)),
@@ -635,11 +631,7 @@ impl Arguments {
         if self.0.is_empty() {
             Ok(None)
         } else {
-            // A simple take_first() implementation.
-            let mut value = OsString::new();
-            std::mem::swap(self.0.first_mut().unwrap(), &mut value);
-            self.0.remove(0);
-
+            let value = self.0.remove(0);
             match f(value.as_os_str()) {
                 Ok(value) => Ok(Some(value)),
                 Err(e) => Err(Error::ArgumentParsingFailed { cause: error_to_string(e) }),
