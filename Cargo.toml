@@ -1,6 +1,6 @@
 [package]
 name = "pico-args"
-version = "0.3.4"
+version = "0.4.0"
 authors = ["Evgeniy Reizner <razrfalcon@gmail.com>"]
 edition = "2018"
 keywords = ["args", "cli"]

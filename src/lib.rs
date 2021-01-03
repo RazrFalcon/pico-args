@@ -25,7 +25,7 @@ If you think that this library doesn't support some feature, it's probably inten
   The optional space is only applicable for short keys because `--keyvalue` would be ambiguous.
 */
 
-#![doc(html_root_url = "https://docs.rs/pico-args/0.3.4")]
+#![doc(html_root_url = "https://docs.rs/pico-args/0.4.0")]
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
