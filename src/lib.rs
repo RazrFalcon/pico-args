@@ -5,7 +5,7 @@ If you think that this library doesn't support some feature, it's probably inten
 
 - No help generation.
 - Only flags, options, free arguments and subcommands are supported.
-- No combined flags (like `-vvv`, `-abc` or `-j1`).
+- No combined flags (like `-vvv` or `-abc`).
 - Options can be separated by a space, `=` or nothing. See build features.
 - Arguments can be in any order.
 - Non UTF-8 arguments are supported.
