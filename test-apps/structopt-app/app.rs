@@ -2,20 +2,20 @@ use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
 struct AppArgs {
-    #[structopt(short = "h", long = "help")]
-    help: bool,
-
+    /// Sets a number.
     #[structopt(long = "number")]
     number: u32,
 
+    /// Sets an optional number.
     #[structopt(long = "opt-number")]
     opt_number: Option<u32>,
 
+    /// Sets width.
     #[structopt(long = "width", default_value = "10", parse(try_from_str = parse_width))]
     width: u32,
 
-    #[structopt(name = "FILE", parse(from_os_str))]
-    free: Vec<std::path::PathBuf>,
+    #[structopt(name = "INPUT", parse(from_os_str))]
+    input: std::path::PathBuf,
 }
 
 fn parse_width(s: &str) -> Result<u32, String> {

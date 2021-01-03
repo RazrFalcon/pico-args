@@ -2,20 +2,20 @@ use gumdrop::Options;
 
 #[derive(Debug, Options)]
 struct AppArgs {
-    #[options(help = "")]
+    #[options(help = "Shows help")]
     help: bool,
 
-    #[options(no_short, required, help = "")]
+    #[options(no_short, required, help = "Sets a number")]
     number: u32,
 
-    #[options(no_short, help = "")]
+    #[options(no_short, help = "Sets an optional number")]
     opt_number: Option<u32>,
 
-    #[options(no_short, help = "", default = "10", parse(try_from_str = "parse_width"))]
+    #[options(no_short, help = "Sets width", default = "10", parse(try_from_str = "parse_width"))]
     width: u32,
 
-    #[options(free)]
-    free: Vec<String>,
+    #[options(free, help = "Input file")]
+    input: std::path::PathBuf,
 }
 
 fn parse_width(s: &str) -> Result<u32, String> {

@@ -1,12 +1,27 @@
-use pico_args::Arguments;
+const HELP: &str = "\
+App
+
+USAGE:
+  app [OPTIONS] --number NUMBER [INPUT]
+
+FLAGS:
+  -h, --help            Prints help information
+
+OPTIONS:
+  --number NUMBER       Sets a number
+  --opt-number NUMBER   Sets an optional number
+  --width WIDTH         Sets width [default: 10]
+
+ARGS:
+  <INPUT>
+";
 
 #[derive(Debug)]
 struct AppArgs {
-    help: bool,
     number: u32,
     opt_number: Option<u32>,
     width: u32,
-    free: Vec<String>,
+    input: Option<std::path::PathBuf>,
 }
 
 fn parse_width(s: &str) -> Result<u32, String> {
@@ -19,21 +34,31 @@ fn parse_width(s: &str) -> Result<u32, String> {
 }
 
 fn main() {
-    if let Err(e) = submain() {
-        eprintln!("Error: {}.", e);
-    }
-}
-
-fn submain() -> Result<(), pico_args::Error> {
-    let mut pargs = Arguments::from_env();
-    let args = AppArgs {
-        help: pargs.contains(["-h", "--help"]),
-        number: pargs.value_from_str("--number")?,
-        opt_number: pargs.opt_value_from_str("--opt-number")?,
-        width: pargs.opt_value_from_fn("--width", parse_width)?.unwrap_or(10),
-        free: pargs.finish().iter().map(|s| s.to_str().unwrap().to_string()).collect(),
+    let args = match parse_args() {
+        Ok(v) => v,
+        Err(e) => {
+            eprintln!("Error: {}.", e);
+            std::process::exit(1);
+        }
     };
 
     println!("{:#?}", args);
-    Ok(())
+}
+
+fn parse_args() -> Result<AppArgs, pico_args::Error> {
+    let mut pargs = pico_args::Arguments::from_env();
+
+    if pargs.contains(["-h", "--help"]) {
+        print!("{}", HELP);
+        std::process::exit(0);
+    }
+
+    let args = AppArgs {
+        number: pargs.value_from_str("--number")?,
+        opt_number: pargs.opt_value_from_str("--opt-number")?,
+        width: pargs.opt_value_from_fn("--width", parse_width)?.unwrap_or(10),
+        input: pargs.free_from_str()?,
+    };
+
+    Ok(args)
 }

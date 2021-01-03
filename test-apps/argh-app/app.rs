@@ -1,23 +1,23 @@
 use argh::FromArgs;
 
-/// App arguments.
+/// App
 #[derive(Debug, FromArgs)]
 struct AppArgs {
-    /// number
+    /// sets number
     #[argh(option)]
     number: u32,
 
-    /// pptional number
+    /// sets optional number
     #[argh(option)]
     opt_number: Option<u32>,
 
-    /// width
+    /// sets width [default: 10]
     #[argh(option, default = "10", from_str_fn(parse_width))]
     width: u32,
 
-    /// free
+    /// input
     #[argh(positional)]
-    free: Vec<String>,
+    input: std::path::PathBuf,
 }
 
 fn parse_width(s: &str) -> Result<u32, String> {

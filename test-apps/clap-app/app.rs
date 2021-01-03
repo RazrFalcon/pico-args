@@ -6,7 +6,7 @@ struct AppArgs {
     number: u32,
     opt_number: Option<u32>,
     width: u32,
-    free: Vec<String>,
+    input: std::path::PathBuf,
 }
 
 fn is_width(s: String) -> Result<(), String> {
@@ -20,36 +20,32 @@ fn is_width(s: String) -> Result<(), String> {
 
 fn main() {
     let matches = App::new("App")
-        .arg(Arg::with_name("help")
-            .short("h")
-            .long("help"))
         .arg(Arg::with_name("number")
             .long("number")
             .required(true)
+            .help("Sets a number")
             .takes_value(true))
         .arg(Arg::with_name("opt-number")
             .long("opt-number")
+            .help("Sets an optional number")
             .takes_value(true))
         .arg(Arg::with_name("width")
             .long("width")
             .default_value("10")
             .validator(is_width)
+            .help("Sets width")
             .takes_value(true))
-        .arg(Arg::with_name("input")
+        .arg(Arg::with_name("INPUT")
             .index(1))
         .get_matches();
 
-    let mut args = AppArgs {
+    let args = AppArgs {
         help: matches.is_present("help"),
         number: value_t!(matches, "number", u32).unwrap(),
         opt_number: value_t!(matches, "opt-number", u32).ok(),
         width: value_t!(matches, "width", u32).unwrap(),
-        free: Vec::new(),
+        input: matches.value_of("INPUT").unwrap().into(),
     };
-
-    if let Some(arg) = matches.value_of("input") {
-        args.free.push(arg.to_string());
-    }
 
     println!("{:#?}", args);
 }
