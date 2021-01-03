@@ -9,9 +9,9 @@ struct Args {
 fn parse_args() -> Result<Args, pico_args::Error> {
     // `from_vec` takes `OsString`, not `String`.
     let mut args: Vec<_> = std::env::args_os().collect();
-    // Make sure to remove the executable path
-    args.remove(0);
-    // Find and process `--`
+    args.remove(0); // remove the executable path.
+
+    // Find and process `--`.
     let forwarded_args = if let Some(dash_dash) = args.iter().position(|arg| arg == "--") {
         // Store all arguments following ...
         let later_args = args.drain(dash_dash+1..).collect();
@@ -21,13 +21,20 @@ fn parse_args() -> Result<Args, pico_args::Error> {
     } else {
         Vec::new()
     };
-    // Now pass the remaining arguments through to `pico_args`
+
+    // Now pass the remaining arguments through to `pico_args`.
     let mut args = pico_args::Arguments::from_vec(args);
     let res = Args {
         forwarded_args,
         help: args.contains(["-h", "--help"]),
     };
-    args.finish()?;
+
+    // It's up to the caller what to do with the remaining arguments.
+    let remaining = args.finish();
+    if !remaining.is_empty() {
+        eprintln!("Warning: unused arguments left: {:?}", remaining);
+    }
+
     Ok(res)
 }
 

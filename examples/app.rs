@@ -1,8 +1,6 @@
 use std::path::PathBuf;
 use std::ffi::OsStr;
 
-use pico_args::Arguments;
-
 #[derive(Debug)]
 struct AppArgs {
     help: bool,
@@ -10,7 +8,7 @@ struct AppArgs {
     opt_number: Option<u32>,
     width: u32,
     input: Option<PathBuf>,
-    free: Vec<String>,
+    output: Option<PathBuf>,
 }
 
 fn parse_width(s: &str) -> Result<u32, &'static str> {
@@ -28,22 +26,28 @@ fn main() {
 }
 
 fn submain() -> Result<(), pico_args::Error> {
-    let mut args = Arguments::from_env();
+    let mut pargs = pico_args::Arguments::from_env();
     let args = AppArgs {
         // Checks that optional flag is present.
-        help: args.contains(["-h", "--help"]),
+        help: pargs.contains(["-h", "--help"]),
         // Parses a required value that implements `FromStr`.
         // Returns an error if not present.
-        number: args.value_from_str("--number")?,
+        number: pargs.value_from_str("--number")?,
         // Parses an optional value that implements `FromStr`.
-        opt_number: args.opt_value_from_str("--opt-number")?,
+        opt_number: pargs.opt_value_from_str("--opt-number")?,
         // Parses an optional value from `&str` using a specified function.
-        width: args.opt_value_from_fn("--width", parse_width)?.unwrap_or(10),
+        width: pargs.opt_value_from_fn("--width", parse_width)?.unwrap_or(10),
         // Parses an optional value from `&OsStr` using a specified function.
-        input: args.opt_value_from_os_str("--input", parse_path)?,
-        // Will return all free arguments or an error if any flags are left.
-        free: args.free()?,
+        input: pargs.opt_value_from_os_str("--input", parse_path)?,
+        // Parses a free-standing/positional argument.
+        output: pargs.free_from_str()?,
     };
+
+    // It's up to the caller what to do with the remaining arguments.
+    let remaining = pargs.finish();
+    if !remaining.is_empty() {
+        eprintln!("Warning: unused arguments left: {:?}.", remaining);
+    }
 
     println!("{:#?}", args);
     Ok(())

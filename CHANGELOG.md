@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- `Arguments::finish` no longer returns an error and simply returns remaining arguments as is.
+- `Arguments::free_from_*` methods no longer check that argument doesn't start with `-`.
+
+### Removed
+- `Arguments::free` and `Arguments::free_os`. You should use `Arguments::free_from_*` methods
+  or parse them manually after calling `Arguments::finish`.
+- `Error::UnusedArgsLeft`. This should be handled by the caller now.
 
 ## [0.3.4] - 2020-08-09
 ### Added

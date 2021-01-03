@@ -25,13 +25,13 @@ fn main() {
 }
 
 fn submain() -> Result<(), pico_args::Error> {
-    let mut args = Arguments::from_env();
+    let mut pargs = Arguments::from_env();
     let args = AppArgs {
-        help: args.contains(["-h", "--help"]),
-        number: args.value_from_str("--number")?,
-        opt_number: args.opt_value_from_str("--opt-number")?,
-        width: args.opt_value_from_fn("--width", parse_width)?.unwrap_or(10),
-        free: args.free()?,
+        help: pargs.contains(["-h", "--help"]),
+        number: pargs.value_from_str("--number")?,
+        opt_number: pargs.opt_value_from_str("--opt-number")?,
+        width: pargs.opt_value_from_fn("--width", parse_width)?.unwrap_or(10),
+        free: pargs.finish().iter().map(|s| s.to_str().unwrap().to_string()).collect(),
     };
 
     println!("{:#?}", args);
