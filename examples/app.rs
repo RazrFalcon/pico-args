@@ -22,7 +22,7 @@ struct AppArgs {
     number: u32,
     opt_number: Option<u32>,
     width: u32,
-    input: Option<std::path::PathBuf>,
+    input: std::path::PathBuf,
     output: Option<std::path::PathBuf>,
 }
 
@@ -41,7 +41,7 @@ fn main() {
 fn parse_args() -> Result<AppArgs, pico_args::Error> {
     let mut pargs = pico_args::Arguments::from_env();
 
-    // Help has a highter priority and should be handled separately.
+    // Help has a higher priority and should be handled separately.
     if pargs.contains(["-h", "--help"]) {
         print!("{}", HELP);
         std::process::exit(0);
@@ -57,7 +57,7 @@ fn parse_args() -> Result<AppArgs, pico_args::Error> {
         width: pargs.opt_value_from_fn("--width", parse_width)?.unwrap_or(10),
         // Parses an optional value from `&OsStr` using a specified function.
         output: pargs.opt_value_from_os_str("--input", parse_path)?,
-        // Parses an optional free-standing/positional argument.
+        // Parses a required free-standing/positional argument.
         input: pargs.free_from_str()?,
     };
 

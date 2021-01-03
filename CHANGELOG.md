@@ -5,9 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- `Arguments::opt_free_from_*`.
+
 ### Changed
 - `Arguments::finish` no longer returns an error and simply returns remaining arguments as is.
 - `Arguments::free_from_*` methods no longer check that argument doesn't start with `-`.
+- `Arguments::free_from_*` methods return `T` instead of `Option<T>` now.
+  Use `Arguments::opt_free_from_*` instead.
 
 ### Removed
 - `Arguments::free` and `Arguments::free_os`. You should use `Arguments::free_from_*` methods

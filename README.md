@@ -45,7 +45,7 @@ There are a lot of arguments parsing implementations, but we will use only these
 
 |                        | null    | `pico-args` | `clap`   | `gumdrop` | `structopt` | `argh`  |
 |------------------------|---------|-------------|----------|-----------|-------------|---------|
-| Binary overhead        | 0KiB    | **14.2KiB** | 373.0KiB | 19.8KiB   | 371.4KiB    | 17.6KiB |
+| Binary overhead        | 0KiB    | **14.3KiB** | 373.0KiB | 19.8KiB   | 371.4KiB    | 17.6KiB |
 | Build time             | 0.4s    | **0.7s**    | 5.6s     | 4.1s      | 6.2s        | 4.0s    |
 | Number of dependencies | 0       | **0**       | 8        | 5         | 20          | 8       |
 | Tested version         | -       | 0.3.4       | 2.33.3   | 0.8.0     | 0.3.21      | 0.1.4   |

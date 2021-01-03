@@ -21,7 +21,7 @@ struct AppArgs {
     number: u32,
     opt_number: Option<u32>,
     width: u32,
-    input: Option<std::path::PathBuf>,
+    input: std::path::PathBuf,
 }
 
 fn parse_width(s: &str) -> Result<u32, String> {

@@ -41,6 +41,9 @@ pub enum Error {
     /// Arguments must be a valid UTF-8 strings.
     NonUtf8Argument,
 
+    /// A missing free-standing argument.
+    MissingArgument,
+
     /// A missing option.
     MissingOption(Keys),
 
@@ -61,6 +64,9 @@ impl Display for Error {
         match self {
             Error::NonUtf8Argument => {
                 write!(f, "argument is not a UTF-8 string")
+            }
+            Error::MissingArgument => {
+                write!(f, "free-standing argument is missing")
             }
             Error::MissingOption(key) => {
                 if key.second().is_empty() {
@@ -428,7 +434,7 @@ impl Arguments {
 
     /// Parses an optional key-value pair using a specified function.
     ///
-    /// The same as `value_from_os_str`, but returns `Ok(None)` when option is not present.
+    /// The same as [`value_from_os_str`], but returns `Ok(None)` when option is not present.
     ///
     /// [`value_from_os_str`]: struct.Arguments.html#method.value_from_os_str
     pub fn opt_value_from_os_str<A: Into<Keys>, T, E: Display>(
@@ -533,10 +539,10 @@ impl Arguments {
         None
     }
 
-    /// Parses an optional free-standing argument using `FromStr` trait.
+    /// Parses a free-standing argument using `FromStr` trait.
     ///
     /// This is a shorthand for `free_from_fn(FromStr::from_str)`
-    pub fn free_from_str<T>(&mut self) -> Result<Option<T>, Error>
+    pub fn free_from_str<T>(&mut self) -> Result<T, Error>
     where
         T: FromStr,
         <T as FromStr>::Err: Display,
@@ -544,7 +550,7 @@ impl Arguments {
         self.free_from_fn(FromStr::from_str)
     }
 
-    /// Parses an optional free-standing argument using a specified function.
+    /// Parses a free-standing argument using a specified function.
     ///
     /// Parses the first argument from the list of remaining arguments.
     /// Therefore, it's up to the caller to check if the argument is actually
@@ -560,10 +566,50 @@ impl Arguments {
     ///
     /// - When argument is not a UTF-8 string. Use [`free_from_os_str`] instead.
     /// - When argument parsing failed.
+    /// - When argument is not present.
     ///
     /// [`free_from_os_str`]: struct.Arguments.html#method.free_from_os_str
     #[inline(never)]
     pub fn free_from_fn<T, E: Display>(
+        &mut self,
+        f: fn(&str) -> Result<T, E>,
+    ) -> Result<T, Error> {
+        self.opt_free_from_fn(f)?.ok_or(Error::MissingArgument)
+    }
+
+    /// Parses a free-standing argument using a specified function.
+    ///
+    /// The same as [`free_from_fn`], but parses `&OsStr` instead of `&str`.
+    ///
+    /// [`free_from_fn`]: struct.Arguments.html#method.free_from_fn
+    #[inline(never)]
+    pub fn free_from_os_str<T, E: Display>(
+        &mut self,
+        f: fn(&OsStr) -> Result<T, E>,
+    ) -> Result<T, Error> {
+        self.opt_free_from_os_str(f)?.ok_or(Error::MissingArgument)
+    }
+
+    /// Parses an optional free-standing argument using `FromStr` trait.
+    ///
+    /// The same as [`free_from_str`], but returns `Ok(None)` when argument is not present.
+    ///
+    /// [`free_from_str`]: struct.Arguments.html#method.free_from_str
+    pub fn opt_free_from_str<T>(&mut self) -> Result<Option<T>, Error>
+        where
+            T: FromStr,
+            <T as FromStr>::Err: Display,
+    {
+        self.opt_free_from_fn(FromStr::from_str)
+    }
+
+    /// Parses an optional free-standing argument using a specified function.
+    ///
+    /// The same as [`free_from_fn`], but returns `Ok(None)` when argument is not present.
+    ///
+    /// [`free_from_fn`]: struct.Arguments.html#method.free_from_fn
+    #[inline(never)]
+    pub fn opt_free_from_fn<T, E: Display>(
         &mut self,
         f: fn(&str) -> Result<T, E>,
     ) -> Result<Option<T>, Error> {
@@ -584,15 +630,11 @@ impl Arguments {
 
     /// Parses a free-standing argument using a specified function.
     ///
-    /// See [`free_from_fn`] documentation for more details.
+    /// The same as [`free_from_os_str`], but returns `Ok(None)` when argument is not present.
     ///
-    /// # Errors
-    ///
-    /// - When argument parsing failed.
-    ///
-    /// [`free_from_fn`]: struct.Arguments.html#method.free_from_fn
+    /// [`free_from_os_str`]: struct.Arguments.html#method.free_from_os_str
     #[inline(never)]
-    pub fn free_from_os_str<T, E: Display>(
+    pub fn opt_free_from_os_str<T, E: Display>(
         &mut self,
         f: fn(&OsStr) -> Result<T, E>,
     ) -> Result<Option<T>, Error> {

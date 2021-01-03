@@ -350,47 +350,54 @@ fn multiple_options_03() {
 }
 
 #[test]
-fn free_from_fn_01() {
+fn free_from_str_01() {
     let mut args = Arguments::from_vec(to_vec(&["5"]));
-    assert_eq!(args.free_from_fn(u32::from_str).unwrap(), Some(5));
+    let value: u32 = args.free_from_str().unwrap();
+    assert_eq!(value, 5);
 }
 
 #[test]
-fn free_from_fn_02() {
+fn opt_free_from_fn_01() {
+    let mut args = Arguments::from_vec(to_vec(&["5"]));
+    assert_eq!(args.opt_free_from_fn(u32::from_str).unwrap(), Some(5));
+}
+
+#[test]
+fn opt_free_from_fn_02() {
     let mut args = Arguments::from_vec(to_vec(&[]));
-    assert_eq!(args.free_from_fn(u32::from_str).unwrap(), None);
+    assert_eq!(args.opt_free_from_fn(u32::from_str).unwrap(), None);
 }
 
 #[test]
-fn free_from_fn_03() {
+fn opt_free_from_fn_03() {
     let mut args = Arguments::from_vec(to_vec(&["-h"]));
-    assert_eq!(args.free_from_fn(u32::from_str).unwrap_err().to_string(),
+    assert_eq!(args.opt_free_from_fn(u32::from_str).unwrap_err().to_string(),
                "failed to parse '-h' cause invalid digit found in string");
 }
 
 #[test]
-fn free_from_fn_04() {
+fn opt_free_from_fn_04() {
     let mut args = Arguments::from_vec(to_vec(&["a"]));
-    assert_eq!(args.free_from_fn(u32::from_str).unwrap_err().to_string(),
+    assert_eq!(args.opt_free_from_fn(u32::from_str).unwrap_err().to_string(),
                "failed to parse 'a' cause invalid digit found in string");
 }
 
 #[test]
-fn free_from_fn_05() {
+fn opt_free_from_fn_05() {
     let mut args = Arguments::from_vec(to_vec(&["-5"]));
-    assert_eq!(args.free_from_fn(i32::from_str).unwrap(), Some(-5));
+    assert_eq!(args.opt_free_from_fn(i32::from_str).unwrap(), Some(-5));
 }
 
 #[test]
-fn free_from_fn_06() {
+fn opt_free_from_fn_06() {
     let mut args = Arguments::from_vec(to_vec(&["-3.14"]));
-    assert_eq!(args.free_from_fn(f32::from_str).unwrap(), Some(-3.14f32));
+    assert_eq!(args.opt_free_from_fn(f32::from_str).unwrap(), Some(-3.14f32));
 }
 
 #[test]
-fn free_from_str_01() {
+fn opt_free_from_str_01() {
     let mut args = Arguments::from_vec(to_vec(&["5"]));
-    let value: Result<Option<u32>, Error> = args.free_from_str();
+    let value: Result<Option<u32>, Error> = args.opt_free_from_str();
     assert_eq!(value.unwrap(), Some(5));
 }
 
