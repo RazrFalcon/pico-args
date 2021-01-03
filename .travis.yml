@@ -1,9 +1,0 @@
-language: rust
-rust:
-  - 1.31.0
-  - stable
-script:
-  - cargo test # with eq-separator feature
-  - cargo test --no-default-features # no eq-separator feature
-  - cargo test --no-default-features --features short-space-opt  # with only short-space-opt
-  - cargo test --all-features # with eq-separator and short-space-opt features

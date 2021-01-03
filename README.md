@@ -1,8 +1,9 @@
 ## pico-args
-[![Build Status](https://travis-ci.org/RazrFalcon/pico-args.svg?branch=master)](https://travis-ci.org/RazrFalcon/pico-args)
+![Build Status](https://github.com/RazrFalcon/pico-args/workflows/Rust/badge.svg)
 [![Crates.io](https://img.shields.io/crates/v/pico-args.svg)](https://crates.io/crates/pico-args)
 [![Documentation](https://docs.rs/pico-args/badge.svg)](https://docs.rs/pico-args)
 [![Rust 1.31+](https://img.shields.io/badge/rust-1.31+-orange.svg)](https://www.rust-lang.org)
+![](https://img.shields.io/badge/unsafe-forbidden-brightgreen.svg)
 
 An ultra simple CLI arguments parser.
 
