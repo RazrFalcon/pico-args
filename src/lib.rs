@@ -114,11 +114,11 @@ impl Arguments {
         Arguments(args)
     }
 
-    /// Creates a parser from [`env::args`].
+    /// Creates a parser from [`env::args_os`].
     ///
     /// The executable path will be removed.
     ///
-    /// [`env::args`]: https://doc.rust-lang.org/stable/std/env/fn.args.html
+    /// [`env::args_os`]: https://doc.rust-lang.org/stable/std/env/fn.args_os.html
     pub fn from_env() -> Self {
         let mut args: Vec<_> = std::env::args_os().collect();
         args.remove(0);
