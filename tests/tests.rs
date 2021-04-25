@@ -197,6 +197,30 @@ fn no_eq_separator_01() {
     assert_eq!(value.unwrap(), None);
 }
 
+#[cfg(feature = "combined-flags")]
+#[test]
+fn combined_flags_01() {
+    let mut args = Arguments::from_vec(to_vec(&["-ab"]));
+    assert!(args.contains("-b"));
+    assert!(args.contains("-a"));
+}
+
+#[cfg(feature = "combined-flags")]
+#[test]
+fn combined_flags_repeated() {
+    let mut args = Arguments::from_vec(to_vec(&["-aaa", "-a"]));
+    assert!(args.contains("-aaa"));
+    assert!(args.contains("-a"));
+}
+
+#[cfg(feature = "combined-flags")]
+#[test]
+fn combined_flags_leftover() {
+    let mut args = Arguments::from_vec(to_vec(&["-ab"]));
+    assert!(args.contains("-a"));
+    assert_eq!(args.finish(), vec![OsString::from("-b")]);
+}
+
 #[cfg(feature = "short-space-opt")]
 #[test]
 fn space_option_01() {
