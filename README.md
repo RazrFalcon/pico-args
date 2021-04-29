@@ -30,6 +30,20 @@ If you think that this library doesn't support some feature, it's probably inten
   If `eq-separator` is disabled, then `-K=value` gives an error instead of returning `"=value"`.<br/>
   The optional space is only applicable for short keys because `--keyvalue` would be ambiguous.
 
+### Examples
+
+If you clone this repository, you can try out some examples of programs that use `pico-args`.
+
+```sh
+cargo run --example app -- --help
+cargo run --example rat -- --help
+cargo run --example dash_dash -- --help
+```
+
+If you have minimal examples of your own, feel free to create a pull request.
+Also feel free to check out the examples in the `examples` folder to see how 
+you can use `pico-args` in your project.
+
 ### Alternatives
 
 The core idea of `pico-args` is to provide some "sugar" for arguments parsing without
