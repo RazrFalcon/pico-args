@@ -207,7 +207,16 @@ fn combined_flags_01() {
 
 #[cfg(feature = "combined-flags")]
 #[test]
-fn combined_flags_repeated() {
+fn combined_flags_repeated_01() {
+    let mut args = Arguments::from_vec(to_vec(&["-aa"]));
+    assert!(args.contains("-a"));
+    assert!(args.contains("-a"));
+    assert!(!args.contains("-a"));
+}
+
+#[cfg(feature = "combined-flags")]
+#[test]
+fn combined_flags_repeated_02() {
     let mut args = Arguments::from_vec(to_vec(&["-aaa", "-a"]));
     assert!(args.contains("-aaa"));
     assert!(args.contains("-a"));
