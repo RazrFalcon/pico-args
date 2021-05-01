@@ -166,18 +166,20 @@ impl Arguments {
         } else {
             #[cfg(feature = "combined-flags")]
             // Combined flags only work of the short flag is a single character
-            if keys.first().len() == 2 {
-                let short_flag = &keys.first()[1..2];
-                for (n, item) in self.0.iter().enumerate() {
-                    if let Some(s) = item.to_str() {
-                        if s.starts_with('-') && s.contains(short_flag) {
-                            if s.len() == 2 {
-                                // last flag
-                                self.0.remove(n);
-                            } else {
-                                self.0[n] = s.replacen(short_flag, "", 1).into();
+            {
+                if keys.first().len() == 2 {
+                    let short_flag = &keys.first()[1..2];
+                    for (n, item) in self.0.iter().enumerate() {
+                        if let Some(s) = item.to_str() {
+                            if s.starts_with('-') && s.contains(short_flag) {
+                                if s.len() == 2 {
+                                    // last flag
+                                    self.0.remove(n);
+                                } else {
+                                    self.0[n] = s.replacen(short_flag, "", 1).into();
+                                }
+                                return true;
                             }
-                            return true;
                         }
                     }
                 }
