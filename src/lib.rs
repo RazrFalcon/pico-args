@@ -23,6 +23,9 @@ If you think that this library doesn't support some feature, it's probably inten
   If `eq-separator` is enabled, then it takes precedence and the '=' is not included.<br/>
   If `eq-separator` is disabled, then `-K=value` gives an error instead of returning `"=value"`.<br/>
   The optional space is only applicable for short keys because `--keyvalue` would be ambiguous.
+
+- `combined-flags`
+  Allows combination of flags, e.g. `-abc` instead of `-a -b -c`. If `short-space-opt` or `eq-separator` are enabled, you must parse flags after values, to prevent ambiguities.
 */
 
 #![doc(html_root_url = "https://docs.rs/pico-args/0.4.0")]
@@ -164,6 +167,26 @@ impl Arguments {
             self.0.remove(idx);
             true
         } else {
+            #[cfg(feature = "combined-flags")]
+            // Combined flags only work of the short flag is a single character
+            {
+                if keys.first().len() == 2 {
+                    let short_flag = &keys.first()[1..2];
+                    for (n, item) in self.0.iter().enumerate() {
+                        if let Some(s) = item.to_str() {
+                            if s.starts_with('-') && s.contains(short_flag) {
+                                if s.len() == 2 {
+                                    // last flag
+                                    self.0.remove(n);
+                                } else {
+                                    self.0[n] = s.replacen(short_flag, "", 1).into();
+                                }
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
             false
         }
     }
@@ -750,10 +773,20 @@ impl From<[&'static str; 2]> for Keys {
     #[inline]
     fn from(v: [&'static str; 2]) -> Self {
         debug_assert!(v[0].starts_with("-"), "an argument should start with '-'");
-        debug_assert!(!v[0].starts_with("--"), "the first argument should be short");
+        validate_shortflag(v[0]);
+        debug_assert!(
+            !v[0].starts_with("--"),
+            "the first argument should be short"
+        );
         debug_assert!(v[1].starts_with("--"), "the second argument should be long");
-
         Keys(v)
+    }
+}
+
+fn validate_shortflag(short_key: &'static str) {
+    let mut chars = short_key[1..].chars();
+    if let Some(first) = chars.next() {
+        debug_assert!(short_key.len() == 2 || chars.all(|c| c == first), "short keys should be a single character or a repeated character");
     }
 }
 
@@ -761,7 +794,9 @@ impl From<&'static str> for Keys {
     #[inline]
     fn from(v: &'static str) -> Self {
         debug_assert!(v.starts_with("-"), "an argument should start with '-'");
-
+        if !v.starts_with("--") {
+            validate_shortflag(v);
+        }
         Keys([v, ""])
     }
 }

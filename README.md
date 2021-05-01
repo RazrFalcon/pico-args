@@ -11,7 +11,6 @@ If you think that this library doesn't support some feature, it's probably inten
 
 - No help generation.
 - Only flags, options, free arguments and subcommands are supported.
-- No combined flags (like `-vvv` or `-abc`).
 - Options can be separated by a space, `=` or nothing. See build features.
 - Arguments can be in any order.
 - Non UTF-8 arguments are supported.
@@ -29,6 +28,9 @@ If you think that this library doesn't support some feature, it's probably inten
   If `eq-separator` is enabled, then it takes precedence and the '=' is not included.<br/>
   If `eq-separator` is disabled, then `-K=value` gives an error instead of returning `"=value"`.<br/>
   The optional space is only applicable for short keys because `--keyvalue` would be ambiguous.
+
+- `combined-flags`
+  Allows combination of flags, e.g. `-abc` instead of `-a -b -c`. If `short-space-opt` or `eq-separator` are enabled, you must parse flags after values, to prevent ambiguities.
 
 ### Alternatives
 

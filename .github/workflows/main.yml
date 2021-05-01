@@ -32,5 +32,8 @@ jobs:
     - name: Test with short-space-opt
       run: cargo test --no-default-features --features short-space-opt
 
+    - name: Test with combined-flags
+      run: cargo test --no-default-features --features combined-flags
+
     - name: Test with all features
       run: cargo test --all-features
