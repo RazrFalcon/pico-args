@@ -30,7 +30,7 @@ If you think that this library doesn't support some feature, it's probably inten
   The optional space is only applicable for short keys because `--keyvalue` would be ambiguous.
 
 - `combined-flags`
-  Allows combination of flags, e.g. `-abc` instead of `-a -b -c`. Conflicts with `short-space-opt`.
+  Allows combination of flags, e.g. `-abc` instead of `-a -b -c`. If `short-space-opt` or `eq-separator` are enabled, you must parse flags after values, to prevent ambiguities.
 
 ### Alternatives
 
