@@ -779,14 +779,12 @@ impl From<[&'static str; 2]> for Keys {
 }
 
 fn validate_shortflag(short_key: &'static str) {
-    #[cfg(feature = "combined-flags")]
-    {
-        let mut chars = short_key[1..].chars();
-        if let Some(first) = chars.next() {
-            debug_assert!(short_key.len() == 2 || chars.all(|c| c == first), "short keys should be a single character or a repeated character if combined-flags is enabled");
-        }
+    let mut chars = short_key[1..].chars();
+    if let Some(first) = chars.next() {
+        debug_assert!(short_key.len() == 2 || chars.all(|c| c == first), "short keys should be a single character or a repeated character");
     }
 }
+
 impl From<&'static str> for Keys {
     #[inline]
     fn from(v: &'static str) -> Self {
