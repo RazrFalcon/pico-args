@@ -28,7 +28,7 @@ If you think that this library doesn't support some feature, it's probably inten
   Allows combination of flags, e.g. `-abc` instead of `-a -b -c`. If `short-space-opt` or `eq-separator` are enabled, you must parse flags after values, to prevent ambiguities.
 */
 
-#![doc(html_root_url = "https://docs.rs/pico-args/0.4.0")]
+#![doc(html_root_url = "https://docs.rs/pico-args/0.4.1")]
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.1] - 2021-05-03
+### Added
+- `combined-flags` feature. Thanks to [@alexwennerberg](https://github.com/alexwennerberg).
+
 ## [0.4.0] - 2021-01-03
 ### Added
 - `Arguments::opt_free_from_*`.
@@ -67,7 +71,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Do not panic while parsing non UTF-8 arguments.
 
-[Unreleased]: https://github.com/RazrFalcon/pico-args/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/RazrFalcon/pico-args/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/RazrFalcon/pico-args/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/RazrFalcon/pico-args/compare/v0.3.4...v0.4.0
 [0.3.4]: https://github.com/RazrFalcon/pico-args/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/RazrFalcon/pico-args/compare/v0.3.2...v0.3.3
