@@ -154,9 +154,14 @@ impl Arguments {
 
     /// Checks that arguments contain a specified flag.
     ///
-    /// Searches through all argument, not only the first/next one.
+    /// Searches through all arguments, not only the first/next one.
     ///
-    /// Must be used only once for each flag.
+    /// Calling this method "consumes" the flag: if a flag is present `n`
+    /// times then the first `n` calls to `contains` for that flag will
+    /// return `true`, and subsequent calls will return `false`.
+    ///
+    /// When the "combined-flags" feature is used, repeated letters count
+    /// as repeated flags: `-vvv` is treated the same as `-v -v -v`.
     pub fn contains<A: Into<Keys>>(&mut self, keys: A) -> bool {
         self.contains_impl(keys.into())
     }
