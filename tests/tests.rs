@@ -230,6 +230,21 @@ fn combined_flags_leftover() {
     assert_eq!(args.finish(), vec![OsString::from("-b")]);
 }
 
+#[test]
+fn long_flag_with_character_from_short_flag() {
+    let mut args = Arguments::from_vec(to_vec(&["--version"]));
+    assert!(!args.contains("-s"));
+    assert!(args.contains("--version"));
+}
+
+#[cfg(feature = "combined-flags")]
+#[test]
+fn combined_long_flag_with_character_from_short_flag() {
+    let mut args = Arguments::from_vec(to_vec(&["--version"]));
+    assert!(!args.contains("-s"));
+    assert!(args.contains("--version"));
+}
+
 #[cfg(feature = "short-space-opt")]
 #[test]
 fn space_option_01() {
