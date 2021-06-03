@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.2] - 2021-06-03
+### Fixed
+- Ignore long options when parsing short options when `combined-flags` feature is enabled.
+  Thanks to [@riquito](https://github.com/riquito).
+- `Arguments::contains` docs. Thanks to [@jneem](https://github.com/jneem).
+
 ## [0.4.1] - 2021-05-03
 ### Added
 - `combined-flags` feature. Thanks to [@alexwennerberg](https://github.com/alexwennerberg).
@@ -71,7 +77,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Do not panic while parsing non UTF-8 arguments.
 
-[Unreleased]: https://github.com/RazrFalcon/pico-args/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/RazrFalcon/pico-args/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/RazrFalcon/pico-args/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/RazrFalcon/pico-args/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/RazrFalcon/pico-args/compare/v0.3.4...v0.4.0
 [0.3.4]: https://github.com/RazrFalcon/pico-args/compare/v0.3.3...v0.3.4
