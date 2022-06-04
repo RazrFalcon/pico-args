@@ -3,30 +3,31 @@ An ultra simple CLI arguments parser.
 
 If you think that this library doesn't support some feature, it's probably intentional.
 
-- No help generation.
-- Only flags, options, free arguments and subcommands are supported.
-- No combined flags (like `-vvv` or `-abc`).
-- Options can be separated by a space, `=` or nothing. See build features.
-- Arguments can be in any order.
-- Non UTF-8 arguments are supported.
+- No help generation
+- Only flags, options, free arguments and subcommands are supported
+- No combined flags (like `-vvv` or `-abc`)
+- Options can be separated by a space, `=` or nothing. See build features
+- Arguments can be in any order
+- Non UTF-8 arguments are supported
 
 ## Build features
 
 - `eq-separator`
 
-  Allows parsing arguments separated by `=`. Enabled by default.<br/>
-  This feature adds about 1KiB to the resulting binary.
+  Allows parsing arguments separated by `=`<br/>
+  This feature adds about 1KiB to the resulting binary
 
 - `short-space-opt`
 
-  Makes the space between short keys and their values optional (e.g. `-w10`).<br/>
+  Makes the space between short keys and their values optional (e.g. `-w10`)<br/>
   If `eq-separator` is enabled, then it takes precedence and the '=' is not included.<br/>
   If `eq-separator` is disabled, then `-K=value` gives an error instead of returning `"=value"`.<br/>
-  The optional space is only applicable for short keys because `--keyvalue` would be ambiguous.
+  The optional space is only applicable for short keys because `--keyvalue` would be ambiguous
 
 - `combined-flags`
-  Allows combination of flags, e.g. `-abc` instead of `-a -b -c`. If `short-space-opt`
-  or `eq-separator` are enabled, you must parse flags after values, to prevent ambiguities.
+  Allows combination of flags, e.g. `-abc` instead of `-a -b -c`.<br/>
+  If `short-space-opt` or `eq-separator` are enabled, you must parse flags after values,
+  to prevent ambiguities.
 */
 
 #![doc(html_root_url = "https://docs.rs/pico-args/0.4.2")]

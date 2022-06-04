@@ -1,9 +1,0 @@
-[package]
-name = "null-app"
-version = "0.1.0"
-authors = ["Yevhenii Reizner <razrfalcon@gmail.com>"]
-edition = "2018"
-
-[[bin]]
-name = "app"
-path = "app.rs"
