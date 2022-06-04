@@ -30,8 +30,6 @@ If you think that this library doesn't support some feature, it's probably inten
   to prevent ambiguities.
 */
 
-#![doc(html_root_url = "https://docs.rs/pico-args/0.4.2")]
-
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
