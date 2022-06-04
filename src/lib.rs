@@ -82,10 +82,10 @@ impl Display for Error {
                 write!(f, "the '{}' option doesn't have an associated value", key)
             }
             Error::Utf8ArgumentParsingFailed { value, cause } => {
-                write!(f, "failed to parse '{}' cause {}", value, cause)
+                write!(f, "failed to parse '{}': {}", value, cause)
             }
             Error::ArgumentParsingFailed { cause } => {
-                write!(f, "failed to parse a binary argument cause {}", cause)
+                write!(f, "failed to parse a binary argument: {}", cause)
             }
         }
     }

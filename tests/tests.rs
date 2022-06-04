@@ -186,7 +186,7 @@ fn eq_option_err_07() {
     let mut args = Arguments::from_vec(to_vec(&["-w=a"]));
     let value: Result<Option<u32>, Error> = args.opt_value_from_str("-w");
     assert_eq!(value.unwrap_err().to_string(),
-               "failed to parse 'a' cause invalid digit found in string");
+               "failed to parse 'a': invalid digit found in string");
 }
 
 #[cfg(not(any(feature = "eq-separator", feature = "short-space-opt")))]
@@ -420,14 +420,14 @@ fn opt_free_from_fn_02() {
 fn opt_free_from_fn_03() {
     let mut args = Arguments::from_vec(to_vec(&["-h"]));
     assert_eq!(args.opt_free_from_fn(u32::from_str).unwrap_err().to_string(),
-               "failed to parse '-h' cause invalid digit found in string");
+               "failed to parse '-h': invalid digit found in string");
 }
 
 #[test]
 fn opt_free_from_fn_04() {
     let mut args = Arguments::from_vec(to_vec(&["a"]));
     assert_eq!(args.opt_free_from_fn(u32::from_str).unwrap_err().to_string(),
-               "failed to parse 'a' cause invalid digit found in string");
+               "failed to parse 'a': invalid digit found in string");
 }
 
 #[test]
