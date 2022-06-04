@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- The `eq-separator` build feature is no longer enabled by default.
+- Small changes to the `Display` output for `Error`.
 
 ## [0.4.2] - 2021-06-03
 ### Fixed
