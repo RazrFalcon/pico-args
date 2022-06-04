@@ -25,7 +25,8 @@ If you think that this library doesn't support some feature, it's probably inten
   The optional space is only applicable for short keys because `--keyvalue` would be ambiguous.
 
 - `combined-flags`
-  Allows combination of flags, e.g. `-abc` instead of `-a -b -c`. If `short-space-opt` or `eq-separator` are enabled, you must parse flags after values, to prevent ambiguities.
+  Allows combination of flags, e.g. `-abc` instead of `-a -b -c`. If `short-space-opt`
+  or `eq-separator` are enabled, you must parse flags after values, to prevent ambiguities.
 */
 
 #![doc(html_root_url = "https://docs.rs/pico-args/0.4.2")]
@@ -791,7 +792,8 @@ impl From<[&'static str; 2]> for Keys {
 fn validate_shortflag(short_key: &'static str) {
     let mut chars = short_key[1..].chars();
     if let Some(first) = chars.next() {
-        debug_assert!(short_key.len() == 2 || chars.all(|c| c == first), "short keys should be a single character or a repeated character");
+        debug_assert!(short_key.len() == 2 || chars.all(|c| c == first),
+            "short keys should be a single character or a repeated character");
     }
 }
 
