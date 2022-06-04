@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 const HELP: &str = "\
 App
 
