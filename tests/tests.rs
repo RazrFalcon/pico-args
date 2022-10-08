@@ -1,5 +1,5 @@
-use std::str::FromStr;
 use std::ffi::OsString;
+use std::str::FromStr;
 
 use pico_args::*;
 
@@ -73,7 +73,6 @@ fn invalid_flag_04() {
     assert!(args.contains(["-v", "version"]));
 }
 
-
 #[test]
 fn option_01() {
     let mut args = Arguments::from_vec(to_vec(&["-w", "10"]));
@@ -132,8 +131,10 @@ fn eq_option_04() {
 fn eq_option_err_01() {
     let mut args = Arguments::from_vec(to_vec(&["-w="]));
     let value: Result<Option<u32>, Error> = args.opt_value_from_str("-w");
-    assert_eq!(value.unwrap_err().to_string(),
-               "the '-w' option doesn't have an associated value");
+    assert_eq!(
+        value.unwrap_err().to_string(),
+        "the '-w' option doesn't have an associated value"
+    );
 }
 
 #[cfg(feature = "eq-separator")]
@@ -141,8 +142,10 @@ fn eq_option_err_01() {
 fn eq_option_err_02() {
     let mut args = Arguments::from_vec(to_vec(&["-w='"]));
     let value: Result<Option<u32>, Error> = args.opt_value_from_str("-w");
-    assert_eq!(value.unwrap_err().to_string(),
-               "the '-w' option doesn't have an associated value");
+    assert_eq!(
+        value.unwrap_err().to_string(),
+        "the '-w' option doesn't have an associated value"
+    );
 }
 
 #[cfg(feature = "eq-separator")]
@@ -150,8 +153,10 @@ fn eq_option_err_02() {
 fn eq_option_err_03() {
     let mut args = Arguments::from_vec(to_vec(&["-w=''"]));
     let value: Result<Option<u32>, Error> = args.opt_value_from_str("-w");
-    assert_eq!(value.unwrap_err().to_string(),
-               "the '-w' option doesn't have an associated value");
+    assert_eq!(
+        value.unwrap_err().to_string(),
+        "the '-w' option doesn't have an associated value"
+    );
 }
 
 #[cfg(feature = "eq-separator")]
@@ -159,8 +164,10 @@ fn eq_option_err_03() {
 fn eq_option_err_04() {
     let mut args = Arguments::from_vec(to_vec(&["-w='\""]));
     let value: Result<Option<u32>, Error> = args.opt_value_from_str("-w");
-    assert_eq!(value.unwrap_err().to_string(),
-               "the '-w' option doesn't have an associated value");
+    assert_eq!(
+        value.unwrap_err().to_string(),
+        "the '-w' option doesn't have an associated value"
+    );
 }
 
 #[cfg(feature = "eq-separator")]
@@ -168,8 +175,10 @@ fn eq_option_err_04() {
 fn eq_option_err_05() {
     let mut args = Arguments::from_vec(to_vec(&["-w='10\""]));
     let value: Result<Option<u32>, Error> = args.opt_value_from_str("-w");
-    assert_eq!(value.unwrap_err().to_string(),
-               "the '-w' option doesn't have an associated value");
+    assert_eq!(
+        value.unwrap_err().to_string(),
+        "the '-w' option doesn't have an associated value"
+    );
 }
 
 #[cfg(all(feature = "eq-separator", not(feature = "short-space-opt")))]
@@ -185,8 +194,10 @@ fn eq_option_err_06() {
 fn eq_option_err_07() {
     let mut args = Arguments::from_vec(to_vec(&["-w=a"]));
     let value: Result<Option<u32>, Error> = args.opt_value_from_str("-w");
-    assert_eq!(value.unwrap_err().to_string(),
-               "failed to parse 'a': invalid digit found in string");
+    assert_eq!(
+        value.unwrap_err().to_string(),
+        "failed to parse 'a': invalid digit found in string"
+    );
 }
 
 #[cfg(not(any(feature = "eq-separator", feature = "short-space-opt")))]
@@ -282,8 +293,10 @@ fn space_option_04() {
 fn space_not_eq_option_err_01() {
     let mut args = Arguments::from_vec(to_vec(&["-w=10"]));
     let value: Result<Option<String>, Error> = args.opt_value_from_str("-w");
-    assert_eq!(value.unwrap_err().to_string(),
-               "the \'-w\' option doesn\'t have an associated value");
+    assert_eq!(
+        value.unwrap_err().to_string(),
+        "the \'-w\' option doesn\'t have an associated value"
+    );
 }
 
 #[cfg(all(feature = "short-space-opt", not(feature = "eq-separator")))]
@@ -323,7 +336,10 @@ fn space_option_err_01() {
 fn space_option_err_02() {
     let mut args = Arguments::from_vec(to_vec(&["-w'10"]));
     let value: Result<Option<u32>, Error> = args.opt_value_from_str("-w");
-    assert_eq!(value.unwrap_err().to_string(), "the \'-w\' option doesn\'t have an associated value");
+    assert_eq!(
+        value.unwrap_err().to_string(),
+        "the \'-w\' option doesn\'t have an associated value"
+    );
 }
 
 #[test]
@@ -352,8 +368,10 @@ fn option_from_os_str_01() {
 fn missing_option_value_01() {
     let mut args = Arguments::from_vec(to_vec(&["--value"]));
     let value: Result<Option<u32>, Error> = args.opt_value_from_str("--value");
-    assert_eq!(value.unwrap_err().to_string(),
-               "the '--value' option doesn't have an associated value");
+    assert_eq!(
+        value.unwrap_err().to_string(),
+        "the '--value' option doesn't have an associated value"
+    );
 }
 
 #[test]
@@ -361,7 +379,7 @@ fn missing_option_value_02() {
     let mut args = Arguments::from_vec(to_vec(&["--value"]));
     let value: Result<Option<u32>, Error> = args.opt_value_from_str("--value");
     assert!(value.is_err()); // ignore error
-    // the `--value` flag should not be removed by the previous command
+                             // the `--value` flag should not be removed by the previous command
     assert_eq!(args.finish(), vec![OsString::from("--value")]);
 }
 
@@ -370,8 +388,11 @@ fn missing_option_value_03() {
     let mut args = Arguments::from_vec(to_vec(&["--value", "q"]));
     let value: Result<Option<u32>, Error> = args.opt_value_from_str("--value");
     assert!(value.is_err()); // ignore error
-    // the `--value` flag should not be removed by the previous command
-    assert_eq!(args.finish(), vec![OsString::from("--value"), OsString::from("q")]);
+                             // the `--value` flag should not be removed by the previous command
+    assert_eq!(
+        args.finish(),
+        vec![OsString::from("--value"), OsString::from("q")]
+    );
 }
 
 #[test]
@@ -419,15 +440,23 @@ fn opt_free_from_fn_02() {
 #[test]
 fn opt_free_from_fn_03() {
     let mut args = Arguments::from_vec(to_vec(&["-h"]));
-    assert_eq!(args.opt_free_from_fn(u32::from_str).unwrap_err().to_string(),
-               "failed to parse '-h': invalid digit found in string");
+    assert_eq!(
+        args.opt_free_from_fn(u32::from_str)
+            .unwrap_err()
+            .to_string(),
+        "failed to parse '-h': invalid digit found in string"
+    );
 }
 
 #[test]
 fn opt_free_from_fn_04() {
     let mut args = Arguments::from_vec(to_vec(&["a"]));
-    assert_eq!(args.opt_free_from_fn(u32::from_str).unwrap_err().to_string(),
-               "failed to parse 'a': invalid digit found in string");
+    assert_eq!(
+        args.opt_free_from_fn(u32::from_str)
+            .unwrap_err()
+            .to_string(),
+        "failed to parse 'a': invalid digit found in string"
+    );
 }
 
 #[test]
@@ -439,7 +468,10 @@ fn opt_free_from_fn_05() {
 #[test]
 fn opt_free_from_fn_06() {
     let mut args = Arguments::from_vec(to_vec(&["-3.14"]));
-    assert_eq!(args.opt_free_from_fn(f32::from_str).unwrap(), Some(-3.14f32));
+    assert_eq!(
+        args.opt_free_from_fn(f32::from_str).unwrap(),
+        Some(-3.14f32)
+    );
 }
 
 #[test]
@@ -460,24 +492,30 @@ fn required_option_01() {
 fn missing_required_option_01() {
     let mut args = Arguments::from_vec(to_vec(&[]));
     let value: Result<u32, Error> = args.value_from_str("-w");
-    assert_eq!(value.unwrap_err().to_string(),
-               "the '-w' option must be set");
+    assert_eq!(
+        value.unwrap_err().to_string(),
+        "the '-w' option must be set"
+    );
 }
 
 #[test]
 fn missing_required_option_02() {
     let mut args = Arguments::from_vec(to_vec(&[]));
     let value: Result<u32, Error> = args.value_from_str("--width");
-    assert_eq!(value.unwrap_err().to_string(),
-               "the '--width' option must be set");
+    assert_eq!(
+        value.unwrap_err().to_string(),
+        "the '--width' option must be set"
+    );
 }
 
 #[test]
 fn missing_required_option_03() {
     let mut args = Arguments::from_vec(to_vec(&[]));
     let value: Result<u32, Error> = args.value_from_str(["-w", "--width"]);
-    assert_eq!(value.unwrap_err().to_string(),
-               "the '-w/--width' option must be set");
+    assert_eq!(
+        value.unwrap_err().to_string(),
+        "the '-w/--width' option must be set"
+    );
 }
 
 #[test]
