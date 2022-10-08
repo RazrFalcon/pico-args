@@ -643,7 +643,7 @@ impl Arguments {
         } else {
             let value = self.0.remove(0);
             let value = os_to_str(value.as_os_str())?;
-            match f(&value) {
+            match f(value) {
                 Ok(value) => Ok(Some(value)),
                 Err(e) => Err(Error::Utf8ArgumentParsingFailed {
                     value: value.to_string(),
@@ -750,7 +750,7 @@ fn ends_with(text: &str, c: u8) -> bool {
 
 #[inline]
 fn os_to_str(text: &OsStr) -> Result<&str, Error> {
-    text.to_str().ok_or_else(|| Error::NonUtf8Argument)
+    text.to_str().ok_or(Error::NonUtf8Argument)
 }
 
 /// A keys container.
@@ -775,7 +775,7 @@ impl Keys {
 impl From<[&'static str; 2]> for Keys {
     #[inline]
     fn from(v: [&'static str; 2]) -> Self {
-        debug_assert!(v[0].starts_with("-"), "an argument should start with '-'");
+        debug_assert!(v[0].starts_with('-'), "an argument should start with '-'");
         validate_shortflag(v[0]);
         debug_assert!(
             !v[0].starts_with("--"),
@@ -799,7 +799,7 @@ fn validate_shortflag(short_key: &'static str) {
 impl From<&'static str> for Keys {
     #[inline]
     fn from(v: &'static str) -> Self {
-        debug_assert!(v.starts_with("-"), "an argument should start with '-'");
+        debug_assert!(v.starts_with('-'), "an argument should start with '-'");
         if !v.starts_with("--") {
             validate_shortflag(v);
         }
