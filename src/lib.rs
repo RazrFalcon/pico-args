@@ -646,7 +646,7 @@ impl Arguments {
         } else {
             let value = self.0.remove(0);
             let value = os_to_str(value.as_os_str())?;
-            match f(&value) {
+            match f(value) {
                 Ok(value) => Ok(Some(value)),
                 Err(e) => Err(Error::Utf8ArgumentParsingFailed {
                     value: value.to_string(),
