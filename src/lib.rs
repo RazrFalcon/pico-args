@@ -777,7 +777,7 @@ impl Keys {
 impl From<[&'static str; 2]> for Keys {
     #[inline]
     fn from(v: [&'static str; 2]) -> Self {
-        debug_assert!(v[0].starts_with("-"), "an argument should start with '-'");
+        debug_assert!(v[0].starts_with('-'), "an argument should start with '-'");
         validate_shortflag(v[0]);
         debug_assert!(
             !v[0].starts_with("--"),
