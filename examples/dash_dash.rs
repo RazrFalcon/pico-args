@@ -16,7 +16,7 @@ fn parse_args() -> Result<Args, pico_args::Error> {
     // Find and process `--`.
     let forwarded_args = if let Some(dash_dash) = args.iter().position(|arg| arg == "--") {
         // Store all arguments following ...
-        let later_args = args.drain(dash_dash+1..).collect();
+        let later_args = args.drain(dash_dash + 1..).collect();
         // .. then remove the `--`
         args.pop();
         later_args
