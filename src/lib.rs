@@ -799,7 +799,7 @@ fn validate_shortflag(short_key: &'static str) {
 impl From<&'static str> for Keys {
     #[inline]
     fn from(v: &'static str) -> Self {
-        debug_assert!(v.starts_with("-"), "an argument should start with '-'");
+        debug_assert!(v.starts_with('-'), "an argument should start with '-'");
         if !v.starts_with("--") {
             validate_shortflag(v);
         }
