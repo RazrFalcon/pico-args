@@ -58,7 +58,7 @@ fn parse_args() -> Result<AppArgs, pico_args::Error> {
         // Parses an optional value from `&str` using a specified function.
         width: pargs.opt_value_from_fn("--width", parse_width)?.unwrap_or(10),
         // Parses an optional value from `&OsStr` using a specified function.
-        output: pargs.opt_value_from_os_str("--input", parse_path)?,
+        output: pargs.opt_value_from_os_str("--output", parse_path)?,
         // Parses a required free-standing/positional argument.
         input: pargs.free_from_str()?,
     };
