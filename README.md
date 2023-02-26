@@ -38,7 +38,7 @@ If you think that this library doesn't support some feature, it's probably inten
 ## Limitations
 
 The main fundamental limitation of `pico-args` is that it parses arguments in an arbitrary order.
-This is because we have a sort of "steaming" API and we don't know all the keys/arguments
+This is because we have a sort of "streaming" API and we don't know all the keys/arguments
 beforehand. This could lead to some unexpected behaviors.
 Specifically, let's say you have a following arguments:
 
