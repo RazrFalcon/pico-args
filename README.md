@@ -52,7 +52,7 @@ A properer parser would knew that `--arg2` is a key and will return an error,
 since the value is missing.
 
 If your parser tries to parse `--arg2` as a flag first and then `--arg1` as key-value,
-than its value would be `value`, because `--arg2` was already removed by the parser
+then its value would be `value`, because `--arg2` was already removed by the parser
 and the arguments list looks like `--arg1 value` to the parser.
 
 If such behavior is unacceptable to your application, then you have to use a more high-level
