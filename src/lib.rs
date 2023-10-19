@@ -5,7 +5,6 @@ If you think that this library doesn't support some feature, it's probably inten
 
 - No help generation
 - Only flags, options, free arguments and subcommands are supported
-- No combined flags (like `-vvv` or `-abc`)
 - Options can be separated by a space, `=` or nothing. See build features
 - Arguments can be in any order
 - Non UTF-8 arguments are supported
@@ -25,9 +24,10 @@ If you think that this library doesn't support some feature, it's probably inten
   The optional space is only applicable for short keys because `--keyvalue` would be ambiguous
 
 - `combined-flags`
-  Allows combination of flags, e.g. `-abc` instead of `-a -b -c`.<br/>
+
+  Allows combination of flags, e.g. `-abc` instead of `-a -b -c`<br/>
   If `short-space-opt` or `eq-separator` are enabled, you must parse flags after values,
-  to prevent ambiguities.
+  to prevent ambiguities
 */
 
 #![forbid(unsafe_code)]
